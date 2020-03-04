@@ -1,0 +1,23 @@
+---
+- name: populate service facts
+  service_facts:
+
+- name: wait for apiserver to come up
+  uri:
+    url: "{{ apiserver_url }}"
+    validate_certs: no
+    status_code: 200,401
+  register: result
+  until: result.status == 401
+  retries: 60
+  delay: 1
+  changed_when: false
+
+- name: install k3s worker node as a service
+  become: yes
+  become_method: sudo
+  shell: /tmp/install-k3s.sh
+  when: 'ansible_facts.services["k3s-agent.service"] is not defined'
+  environment:
+    INSTALL_K3S_EXEC: agent --server {{ apiserver_url }} --token {{ node_password }}
+    INSTALL_K3S_SKIP_DOWNLOAD: true

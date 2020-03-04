@@ -1,0 +1,15 @@
+---
+- name: disable onboard WiFi on boot
+  lineinfile:
+    path: /boot/config.txt
+    line: dtoverlay=pi3-disable-wifi
+    state: present
+
+- name: disable onboard Bluetooth on boot
+  lineinfile:
+    path: /boot/config.txt
+    line: dtoverlay=pi3-disable-bt
+    state: present
+
+- name: disable systemd service that inits bluetooth modems connected by UART
+  shell: systemctl disable hciuart

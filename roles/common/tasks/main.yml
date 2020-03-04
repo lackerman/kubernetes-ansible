@@ -1,0 +1,11 @@
+---
+- include: init.yml
+
+- name: ensure devtools are at the latest version
+  apt:
+    name: ['vim', 'git', 'htop', 'tree', 'tmux', 'dnsutils', 'jq', 'lsof']
+    state: latest
+
+- include: disable_wifi_radio.yml
+
+- include: hostfile.yml

@@ -1,0 +1,40 @@
+---
+- name: setup the SSD1306-based python libraries to operate the OLED displays
+  become: yes
+  become_method: sudo
+  block:
+    - name: check whether the i2c libraries have been installed
+      shell: ls /usr/local/lib/python3.7/dist-packages/ | grep SSD1306
+  rescue:
+    - name: ensure i2c python libraries are installed
+      apt:
+        name: ['python3-dev', 'python-smbus', 'i2c-tools', 'python3-pil', 'python3-pip', 'python3-setuptools', 'python3-rpi.gpio']
+        update_cache: yes
+        state: latest
+
+    - name: use i2cdetect command to use the module on the i2c bus
+      shell: i2cdetect -y 1
+
+    - name: clone the python repo to use SSD1306-based OLED displays
+      git:
+        repo: https://github.com/adafruit/Adafruit_Python_SSD1306.git
+        dest: /tmp/adafruit_ssd1306
+
+    - name: install the python i2c libraries
+      command: chdir=/tmp/adafruit_ssd1306 python3 setup.py install
+
+    - name: remove the directory
+      file:
+        state: absent
+        path: "/tmp/adafruit_ssd1306"
+
+- name: copy the latest i2c display scripts
+  become: yes
+  become_method: sudo
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/bin/
+    owner: "root"
+    mode: 0744
+  with_fileglob:
+    - files/*

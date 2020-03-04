@@ -1,0 +1,33 @@
+---
+- name: check whether k3s has been installed before
+  stat:
+    path: /usr/local/bin/k3s
+  register: k3s_binary
+
+- name: download the k3s binaries and installation scripts
+  when: k3s_binary.stat.exists == False
+  block:
+    - name: download k3s version '{{ k3s_version }}'
+      become: yes
+      become_method: sudo
+      get_url:
+        url: https://github.com/rancher/k3s/releases/download/{{ k3s_version }}/k3s-armhf
+        dest: /usr/local/bin/k3s
+        mode: '0755'
+
+    - name: download k3s install script
+      get_url:
+        url: https://get.k3s.io
+        dest: /tmp/install-k3s.sh
+        mode: '0755'
+
+- name: copy the convenience scripts to /usr/local/bin
+  become: yes
+  become_method: sudo
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/bin/
+    owner: "root"
+    mode: 0744
+  with_fileglob:
+    - files/*

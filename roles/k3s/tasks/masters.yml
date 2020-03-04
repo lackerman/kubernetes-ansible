@@ -1,0 +1,59 @@
+---
+- name: populate service facts
+  service_facts:
+
+- name: install k3s service for master node
+  become: yes
+  become_method: sudo
+  when: 'ansible_facts.services["k3s.service"] is not defined'
+  block:
+    - name: install k3s master as a service
+      shell: /tmp/install-k3s.sh
+      environment:
+        INSTALL_K3S_EXEC: "server --no-deploy=servicelb --no-deploy=traefik"
+        INSTALL_K3S_SKIP_DOWNLOAD: true
+
+    - name: wait for kubeconfig to be created
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+
+    - name: remove the directory
+      file:
+        state: directory
+        path: "{{ ansible_env.HOME }}/.kube"
+
+    - name: copy the kubeconfig to the home dir
+      copy:
+        remote_src: True
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ ansible_env.HOME }}/.kube/config"
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_id }}"
+        mode: '0644'
+
+    - name: wait for apiserver to come up
+      command: "kubectl get nodes"
+      register: result
+      until: result is successful
+      retries: 60
+      delay: 1
+      changed_when: false
+
+    - name: prevent the master node from running workloads
+      shell: "kubectl taint nodes {{ inventory_hostname }} node-role.kubernetes.io/master=true:NoSchedule --overwrite"
+
+- name: get the password needed by nodes to join the cluster
+  become: yes
+  become_method: sudo
+  slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: node_token
+
+- set_fact:
+    node_token: "{{ node_token.content | b64decode | replace('\n', '') }}"
+
+- name: set the node_password needed by workers to join the cluster
+  set_fact: node_password="{{ node_token }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  loop: "{{ groups['workers'] }}"

@@ -1,0 +1,9 @@
+---
+ansible_python_interpreter: /usr/bin/python
+k3s_version: "v1.0.1"
+metallb_version: "v0.8.1"
+nginx_ingress_controller_version: "0.26.2"
+apiserver_url: "https://knode0:6443"
+ingress_http_node_port: "30080"
+ingress_https_node_port: "30443"
+registry_domain: "registry.local"

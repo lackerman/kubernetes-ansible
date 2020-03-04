@@ -1,0 +1,7 @@
+[masters]
+knode0
+
+[workers]
+knode1
+knode2
+knode3

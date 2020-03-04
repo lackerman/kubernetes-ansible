@@ -1,0 +1,18 @@
+---
+- name: add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{item}} hi"
+    state: present
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.all }}"
+
+- name: add master nodes as registry
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{ item }} {{ registry_domain }}"
+    state: present
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.masters }}"

@@ -1,0 +1,44 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  roles:
+  - role: common
+    tags: common
+
+- hosts: all
+  roles:
+  - role: displays
+    tags: displays
+
+- hosts: masters
+  roles:
+  - role: k3s
+    tags: k3s
+
+- hosts: workers
+  roles:
+  - role: k3s
+    tags: k3s
+
+- hosts: masters
+  roles:
+    - role: ingress
+      tags: ingress
+
+- hosts: masters
+  become: yes
+  become_method: sudo
+  roles:
+    - role: loadbalancer
+      tags: loadbalancer
+
+- hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: clear the deb cache and remove unused packages
+      apt:
+        autoclean: yes
+        autoremove: yes
+

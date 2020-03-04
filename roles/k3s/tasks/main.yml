@@ -1,0 +1,8 @@
+---
+- include: prerequisites.yml
+
+- block:
+  - include: masters.yml
+    when: kubernetes_node == 'master'
+  - include: workers.yml
+    when: kubernetes_node == 'worker'
