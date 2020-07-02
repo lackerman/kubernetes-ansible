@@ -1,15 +1,29 @@
 ---
+- name: "check if {{ firmware_config }} file exists"
+  stat:
+    path: "{{ firmware_config }}"
+  register: config_file
+
 - name: disable onboard WiFi on boot
   lineinfile:
-    path: /boot/config.txt
+    path: "{{ firmware_config }}"
     line: dtoverlay=pi3-disable-wifi
     state: present
+  when: config_file.stat.exists == True
 
 - name: disable onboard Bluetooth on boot
   lineinfile:
-    path: /boot/config.txt
+    path: "{{ firmware_config }}"
     line: dtoverlay=pi3-disable-bt
     state: present
+  when: config_file.stat.exists == True
+
+- name: populate service facts
+  service_facts:
 
 - name: disable systemd service that inits bluetooth modems connected by UART
-  shell: systemctl disable hciuart
+  systemd:
+    name: hciuart
+    state: stopped
+    enabled: false
+  when: "'hciuart' in services"

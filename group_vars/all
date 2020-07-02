@@ -1,7 +1,19 @@
 ---
-ansible_python_interpreter: /usr/bin/python
-k3s_version: "v1.0.1"
-metallb_version: "v0.8.1"
+ansible_python_interpreter: /usr/bin/python3
+
+default_user: pi
+firmware_config: /boot/config.txt
+cmdline_config: /boot/cmdline.txt
+#default_user: ubuntu
+#firmware_config: /boot/firmware/usercfg.txt
+#cmdline_config: /boot/firmware/cmdline.txt
+
+# New user creation is based on your current user
+create_user: "{{ lookup('env','USER') }}"
+copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+# Kubernetes settings
+k3s_version: "v1.18.4+k3s1"
 nginx_ingress_controller_version: "0.26.2"
 apiserver_url: "https://knode0:6443"
 ingress_http_node_port: "30080"

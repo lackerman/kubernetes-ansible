@@ -1,0 +1,89 @@
+---
+- debug:
+    msg: "ansible_user: {{ ansible_user | d('unset') }} | remote_user: {{ remote_user | d('unset') }}"
+
+  # This is not an ICMP ping but instead a check to see if the connection can be made
+- action: ping
+  ignore_unreachable: true
+  ignore_errors: yes
+  register: pingtest
+
+- name: "set ansible_user if ping failed"
+  set_fact:
+    ansible_user: "{{ default_user }}"
+  when: pingtest.failed | d(pingtest.unreachable) | d(false)
+
+- debug:
+    msg: "ansible_user: {{ ansible_user | d('unset') }}"
+
+- name: make sure we have a 'wheel' group
+  group:
+    name: wheel
+    state: present
+
+- name: allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: '/usr/sbin/visudo -cf %s'
+
+- name: create a new regular user with sudo privileges
+  user:
+    name: "{{ create_user }}"
+    state: present
+    groups: wheel
+    append: true
+    create_home: true
+    shell: /bin/bash
+
+- name: set authorized key for remote user
+  authorized_key:
+    user: "{{ create_user }}"
+    state: present
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+- name: disable password authentication
+  replace:
+    path: /etc/ssh/sshd_config
+    regexp: '^#*PasswordAuthentication .*'
+    replace: 'PasswordAuthentication no'
+  notify: restart ssh
+
+- name: "disable challenge response authentication"
+  replace:
+    path: /etc/ssh/sshd_config
+    regexp: '^#*ChallengeResponseAuthentication .*'
+    replace: 'ChallengeResponseAuthentication no'
+  notify: restart ssh
+
+- name: "set ansible_user to '{{ create_user }}'"
+  set_fact:
+    ansible_user: "{{ create_user }}"
+  when: pingtest.failed | d(pingtest.unreachable) | d(false)
+
+- name: "reset ssh connection to allow user changes to affect 'current login user'"
+  meta: reset_connection
+
+- debug:
+    msg: "ansible_user: {{ ansible_user | d('unset') }}"
+
+- name: "remove the default '{{ default_user }}' user"
+  user:
+    name: "{{ default_user }}"
+    state: absent
+    remove: yes
+    force: yes
+
+- name: "remove welcome messages"
+  file:
+    path: /etc/update-motd.d/
+    state: directory
+    recurse: yes
+    mode: 644
+
+- name: "ensure a locale exists"
+  locale_gen:
+    name: en_US.UTF-8
+    state: present

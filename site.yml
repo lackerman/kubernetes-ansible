@@ -2,11 +2,15 @@
 - hosts: all
   become: yes
   become_method: sudo
+  gather_facts: no
   roles:
   - role: common
     tags: common
 
 - hosts: all
+  become: yes
+  become_method: sudo
+  gather_facts: no
   roles:
   - role: displays
     tags: displays
@@ -21,24 +25,23 @@
   - role: k3s
     tags: k3s
 
-- hosts: masters
-  roles:
-    - role: ingress
-      tags: ingress
-
-- hosts: masters
-  become: yes
-  become_method: sudo
-  roles:
-    - role: loadbalancer
-      tags: loadbalancer
+#- hosts: masters
+#  roles:
+#    - role: ingress
+#      tags: ingress
+#
+#- hosts: masters
+#  become: yes
+#  become_method: sudo
+#  roles:
+#    - role: loadbalancer
+#      tags: loadbalancer
 
 - hosts: all
   become: yes
   become_method: sudo
   tasks:
-    - name: clear the deb cache and remove unused packages
+    - name: "clear the deb cache and remove unused packages"
       apt:
         autoclean: yes
         autoremove: yes
-

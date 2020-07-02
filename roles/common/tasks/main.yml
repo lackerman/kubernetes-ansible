@@ -1,11 +1,12 @@
 ---
-- include: init.yml
-
-- name: ensure devtools are at the latest version
-  apt:
-    name: ['vim', 'git', 'htop', 'tree', 'tmux', 'dnsutils', 'jq', 'lsof']
-    state: latest
-
-- include: disable_wifi_radio.yml
-
+# Creates the new user and sets up the ssh config
+- include: user_ssh.yml
+# sets the hostname of the machine
+- hostname:
+    name: "{{ inventory_hostname }}"
+# Updates the apt cache and installs minimum required software after installing updates
+- include: packages.yml
+# Sets up the /etc/hosts file
 - include: hostfile.yml
+# Disables bluetooth and wifi
+- include: disable_wifi_radio.yml

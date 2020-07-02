@@ -1,0 +1,36 @@
+---
+- name: "disable auto-updates before running an upgrade"
+  vars:
+    enabled: 0
+  template:
+    src: 20auto-upgrades.j2
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: "root"
+    mode: 0644
+  register: disable_auto_update
+
+- name: "reboot and wait until ready"
+  reboot:
+    msg: "Reboot initiated by ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: whoami
+  when: disable_auto_update.changed
+
+- name: "update all packages to the latest version"
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    upgrade: safe
+
+- name: "install python-apt to enable ansible check"
+  apt:
+    name: python-apt
+    state: latest
+
+- name: "ensure devtools are at the latest version"
+  apt:
+    name: ['vim', 'git', 'htop', 'tree', 'tmux', 'dnsutils', 'jq', 'lsof']
+    state: latest

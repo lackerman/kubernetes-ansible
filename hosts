@@ -1,7 +1,7 @@
 [masters]
-knode0
+knode0  ansible_host=192.168.178.160
 
 [workers]
-knode1
-knode2
-knode3
+knode1  ansible_host=192.168.178.161
+knode2  ansible_host=192.168.178.162
+knode3  ansible_host=192.168.178.163

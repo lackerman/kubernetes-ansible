@@ -10,7 +10,7 @@
     - name: install k3s master as a service
       shell: /tmp/install-k3s.sh
       environment:
-        INSTALL_K3S_EXEC: "server --no-deploy=servicelb --no-deploy=traefik"
+        INSTALL_K3S_EXEC: "server"
         INSTALL_K3S_SKIP_DOWNLOAD: true
 
     - name: wait for kubeconfig to be created
