@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Taken from
+# Script to allow you to create a new k8s user with admin rights on a specific namespace
+# Taken from:
 # https://docs.bitnami.com/kubernetes/how-to/configure-rbac-in-your-kubernetes-cluster/#step-2-create-the-user-credentials
 
 USERNAME=$1
@@ -15,16 +16,20 @@ fi
 CA_LOCATION=/var/lib/rancher/k3s/server/tls/client-ca
 CERT_AUTHORITY="$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}')"
 
-openssl genrsa -out ${USERNAME}.key 2048
+WORK_DIR="/tmp/k3s-user-${USERNAME}-${NAMESPACE}"
+mkdir -p "${WORK_DIR}"
+cd "${WORK_DIR}"
 
-openssl req -new -key ${USERNAME}.key \
-    -out ${USERNAME}.csr \
+openssl genrsa -out "${USERNAME}.key" 2048
+
+openssl req -new -key "${USERNAME}.key" \
+    -out "${USERNAME}.csr" \
     -subj "/CN=${USERNAME}/O=${NAMESPACE}"
 
-openssl x509 -req -in ${USERNAME}.csr \
+openssl x509 -req -in "${USERNAME}.csr" \
     -CA "${CA_LOCATION}.crt" \
     -CAkey "${CA_LOCATION}.key" \
-    -CAcreateserial -out ${USERNAME}.crt -days 500
+    -CAcreateserial -out "${USERNAME}.crt" -days 500
 
 cat <<EOF | kubectl apply -f -
 kind: Role
@@ -52,7 +57,7 @@ roleRef:
   apiGroup: ""
 EOF
 
-cat >> config <<EOF
+cat >> "${WORK_DIR}/config" <<EOF
 apiVersion: v1
 clusters:
 - cluster:
@@ -75,5 +80,5 @@ users:
     client-key: ${USERNAME}.key
 EOF
 
-tar --remove-files -cf ${USERNAME}-${NAMESPACE}.tar *
-chown ${SUDO_USER}:${SUDO_USER} ${USERNAME}-${NAMESPACE}.tar
+tar --remove-files -cf "/tmp/${USERNAME}-${NAMESPACE}.tar" "${WORK_DIR}"
+chown "${SUDO_USER}":"${SUDO_USER}" "${USERNAME}-${NAMESPACE}.tar"
