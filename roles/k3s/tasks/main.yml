@@ -3,6 +3,6 @@
 
 - block:
   - include: masters.yml
-    when: kubernetes_node == 'master'
+    when: inventory_hostname in groups['masters']
   - include: workers.yml
-    when: kubernetes_node == 'worker'
+    when: inventory_hostname in groups['workers']

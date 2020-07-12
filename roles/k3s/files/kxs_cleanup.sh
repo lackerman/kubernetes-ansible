@@ -33,3 +33,8 @@ rm -rf \
     /home/${SUDO_USER}/.kube \
     /root/.kube \
     /run/k3s
+
+# Make sure to stop the service and reload the systemd daemon
+systemctl stop k3s-agent.service
+systemctl daemon-reload
+systemctl reset-failed
