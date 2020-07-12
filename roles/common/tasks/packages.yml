@@ -34,3 +34,29 @@
   apt:
     name: ['vim', 'git', 'htop', 'tree', 'tmux', 'dnsutils', 'jq', 'lsof']
     state: latest
+
+- name: tailscale signing key
+  become: yes
+  apt_key:
+    url: https://pkgs.tailscale.com/stable/ubuntu/focal.gpg
+    state: present
+
+- name: add tailscale deb
+  become: yes
+  apt_repository:
+    repo: deb https://pkgs.tailscale.com/stable/ubuntu focal main
+    state: present
+    filename: tailscale.list
+
+- name: install tailscale
+  become: yes
+  apt:
+    name: tailscale
+    state: present
+    update_cache: yes
+
+- name: start tailscale
+  systemd:
+    name: tailscaled
+    state: started
+    enabled: true
