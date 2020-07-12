@@ -4,38 +4,26 @@
   become_method: sudo
   gather_facts: no
   roles:
-  - role: common
-    tags: common
+    - role: common
+      tags: common
 
-- hosts: all
+- hosts: rpis
   become: yes
   become_method: sudo
   gather_facts: no
   roles:
-  - role: displays
-    tags: displays
+    - role: displays
+      tags: displays
 
 - hosts: masters
   roles:
-  - role: k3s
-    tags: k3s
+    - role: k3s
+      tags: k3s
 
 - hosts: workers
   roles:
-  - role: k3s
-    tags: k3s
-
-#- hosts: masters
-#  roles:
-#    - role: ingress
-#      tags: ingress
-#
-#- hosts: masters
-#  become: yes
-#  become_method: sudo
-#  roles:
-#    - role: loadbalancer
-#      tags: loadbalancer
+    - role: k3s
+      tags: k3s
 
 - hosts: all
   become: yes
