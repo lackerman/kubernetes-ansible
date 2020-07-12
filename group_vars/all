@@ -14,7 +14,8 @@ copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}
 
 # Kubernetes settings
 k3s_version: "v1.18.4+k3s1"
+cert_manager_version: "v0.15.1"
 apiserver_url: "https://knode0:6443"
-ingress_http_node_port: "30080"
-ingress_https_node_port: "30443"
-registry_domain: "registry.local"
+
+# Email used by cert-manager to to notify you if there were issues registering the certificate
+email:
