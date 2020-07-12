@@ -25,6 +25,13 @@
     - role: k3s
       tags: k3s
 
+- hosts: loadbalancers
+  become: yes
+  become_method: sudo
+  roles:
+    - role: loadbalancer
+      tags: loadbalancer
+
 - hosts: masters
   roles:
     - role: k3s-cert-manager

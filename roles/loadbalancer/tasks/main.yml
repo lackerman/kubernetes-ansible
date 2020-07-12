@@ -1,16 +1,16 @@
 ---
-- name: install nginx
+- name: 'install nginx and mod-stream'
   apt:
     name: ['nginx', 'libnginx-mod-stream']
     state: present
 
-- name: copy base nginx configuration
+- name: 'copy base nginx configuration'
   template:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
   notify: restart nginx
 
-- name: copy nginx configuration for loadbalancing nodes
+- name: 'copy nginx configuration for loadbalancing nodes'
   file:
     path: /etc/nginx/conf.d/default.conf
     state: absent
