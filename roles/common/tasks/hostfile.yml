@@ -1,18 +1,25 @@
 ---
-- name: add IP address of all hosts to all hosts
+- name: add current server to hosts files
   lineinfile:
     dest: /etc/hosts
-    regexp: '.*{{ item }}$'
-    line: "{{ hostvars[item].ansible_host }} {{item}}"
+    regexp: '^127\.0\.0\.1[ \t]+localhost.*'
+    line: '127.0.0.1 localhost {{ inventory_hostname }}'
     state: present
-  when: hostvars[item].ansible_host is defined
-  with_items: "{{ groups.all }}"
 
-- name: add master nodes as registry
+- name: add all workers to master nodes hosts files
   lineinfile:
     dest: /etc/hosts
     regexp: '.*{{ item }}$'
-    line: "{{ hostvars[item].ansible_host }} {{ item }} {{ registry_domain }}"
+    line: "{{ hostvars[item].ansible_host }} {{ item }}"
     state: present
-  when: hostvars[item].ansible_host is defined
-  with_items: "{{ groups.masters }}"
+  when: inventory_hostname in groups['masters'] and hostvars[item].ansible_host is defined
+  with_items: "{{ groups.workers }}"
+
+- name: add IP address of all hosts tailscale IPs to the loadbalancers
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{item}}.vpn$'
+    line: "{{ hostvars[item].vpn }} {{item}}.vpn"
+    state: present
+  when: inventory_hostname in groups['loadbalancers'] and hostvars[item].vpn is defined
+  with_items: "{{ groups.workers }}"
