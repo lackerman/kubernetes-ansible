@@ -1,0 +1,94 @@
+---
+# A great guide which helped me set everything up
+# https://opensource.com/article/20/3/ssl-letsencrypt-k3s
+- pip:
+    name:
+    - openshift
+    - kubernetes
+    - kubernetes-validate
+  become: True
+
+- name: "make sure any previous versions of the file are removed before starting"
+  become: yes
+  become_method: sudo
+  file:
+    path: /tmp/cert-manager.yaml
+    state: absent
+
+- name: "download cert-manager yaml for version '{{ cert_manager_version }}'"
+  get_url:
+    url: "https://github.com/jetstack/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.yaml"
+    dest: /tmp/cert-manager.yaml
+    mode: '0755'
+
+- name: "update the yaml to use the arm images of cert-manager"
+  replace:
+    path: /tmp/cert-manager.yaml
+    regexp: '^(\s+)(image:.*):(v.*)$'
+    replace: '\1\2-arm:\3'
+
+- name: "deploy cert-manager"
+  become: yes
+  become_method: sudo
+  k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    src: /tmp/cert-manager.yaml
+    validate:
+      fail_on_error: yes
+
+- name: "create letsencrypt staging certificate issuer"
+  become: yes
+  become_method: sudo
+  k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    validate:
+      fail_on_error: yes
+    definition:
+      apiVersion: cert-manager.io/v1alpha2
+      kind: ClusterIssuer
+      metadata:
+        name: "letsencrypt-staging"
+      spec:
+        acme:
+          # The ACME server URL
+          server: "https://acme-staging-v02.api.letsencrypt.org/directory"
+          # Email address used for ACME registration
+          email: "{{ email }}"
+          # Name of a secret used to store the ACME account private key
+          privateKeySecretRef:
+            name: "letsencrypt-staging"
+          # Enable the HTTP-01 challenge provider
+          solvers:
+            - http01:
+                ingress:
+                  class: traefik
+
+- name: "create letsencrypt production certificate issuer"
+  become: yes
+  become_method: sudo
+  k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    validate:
+      fail_on_error: yes
+    definition:
+      apiVersion: cert-manager.io/v1alpha2
+      kind: ClusterIssuer
+      metadata:
+        name: "letsencrypt-prod"
+      spec:
+        acme:
+          # The ACME server URL
+          server: "https://acme-v02.api.letsencrypt.org/directory"
+          # Email address used for ACME registration
+          email: "{{ email }}"
+          # Name of a secret used to store the ACME account private key
+          privateKeySecretRef:
+            name: "letsencrypt-prod"
+          # Enable the HTTP-01 challenge provider
+          solvers:
+            - http01:
+                ingress:
+                  class: traefik

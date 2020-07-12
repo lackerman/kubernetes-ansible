@@ -25,6 +25,11 @@
     - role: k3s
       tags: k3s
 
+- hosts: masters
+  roles:
+    - role: k3s-cert-manager
+      tags: k3s-cert-manager
+
 - hosts: all
   become: yes
   become_method: sudo
