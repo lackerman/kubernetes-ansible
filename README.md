@@ -6,6 +6,10 @@
     - use `ssh-keygen` to setup a new public-private key pair if you haven't already
 - make sure to set the variables in [group_vars/all](group_vars/all) to use either
   the default ubuntu or Raspberry Pi OS user and config files.
+- Make sure you have the `openshift` pip package for interacting with kubernetes
+    ```python
+    pip install openshift kubernetes kubernetes-validate
+    ```
 
 ## manual steps
 
