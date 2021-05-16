@@ -1,0 +1,56 @@
+---
+- name: populate service facts
+  service_facts:
+
+- name: install k0s service for master node
+  become: yes
+  become_method: sudo
+  when: 'ansible_facts.services["k0scontroller.service"] is not defined'
+  block:
+    - name: install k0s controller as a service
+      shell: k0s install controller
+
+    - name: enable the service
+      systemd:
+        name: k0s
+        enabled: True
+
+    # https://github.com/k0sproject/k0s/blob/8f351b3887bf80480c041121d5d1353f94dda4df/docs/troubleshooting.md#k0s-server-fails-on-arm-boxes
+    - name: make sure we include the ENV VAR for etcd
+      lineinfile:
+        dest: /etc/systemd/system/k0s.service
+        insertbefore: '^ExecStart=.*'
+        regexp: '^Environment=ETCD_UNSUPPORTED_ARCH=arm64'
+        line: 'Environment=ETCD_UNSUPPORTED_ARCH=arm64'
+        state: present
+
+    - name: start k0s
+      systemd:
+        state: started
+        name: k0s
+
+    - name: create .kube the directory
+      file:
+        state: directory
+        path: "{{ ansible_env.HOME }}/.kube"
+
+    - name: copy kubeconfig to user home directory
+      shell: "k0s kubeconfig create --groups 'system:masters' k0s > {{ ansible_env.HOME }}/.kube/config"
+
+    - name: prevent the master node from running workloads
+      shell: "kubectl taint nodes {{ inventory_hostname }} node-role.kubernetes.io/master=true:NoSchedule --overwrite"
+
+- shell: k0s token create --role worker
+  loop: "{{ groups['workers'] }}"
+  register: node_token
+
+- debug:
+    msg: "node_token {{ item }}"
+  with_items:
+    - "{{ node_token.stdout_lines }}"
+
+#- name: set the node_password needed by workers to join the cluster
+#  set_fact: node_password="{{ k0s token create --role worker }}"
+#  delegate_to: "{{ item }}"
+#  delegate_facts: True
+#  loop: "{{ groups['workers'] }}"

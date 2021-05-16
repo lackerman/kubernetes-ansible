@@ -1,21 +1,33 @@
 ---
 ansible_python_interpreter: /usr/bin/python3
 
-default_user: pi
-firmware_config: /boot/config.txt
-cmdline_config: /boot/cmdline.txt
-#default_user: ubuntu
-#firmware_config: /boot/firmware/usercfg.txt
-#cmdline_config: /boot/firmware/cmdline.txt
-
 # New user creation is based on your current user
 create_user: "{{ lookup('env','USER') }}"
 copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
 # Kubernetes settings
-k3s_version: "v1.18.4+k3s1"
-cert_manager_version: "v0.15.1"
+k0s_version: "v0.9.1"
+k3s_version: "v1.20.5+k3s1"
+cert_manager_version: "v1.2.0"
+longhorn_version: "v1.1.1"
 apiserver_url: "https://knode0:6443"
 
-# Email used by cert-manager to to notify you if there were issues registering the certificate
-email:
+# Email used by cert-manager to to notify you
+# if there were issues registering the certificate
+email: ackerman.leo@gmail.com
+
+#############################################
+# For RaspberryOS uncomment the following
+#############################################
+
+#default_user: pi
+#firmware_config: /boot/config.txt
+#cmdline_config: /boot/cmdline.txt
+
+#############################################
+# For Ubuntu uncomment the following
+#############################################
+
+default_user: ubuntu
+firmware_config: /boot/firmware/usercfg.txt
+cmdline_config: /boot/firmware/cmdline.txt
