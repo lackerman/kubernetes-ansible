@@ -1,0 +1,13 @@
+---
+- name: Install helm chart
+  helm:
+    host: localhost
+    chart:
+      name: traefik
+      version: 9.11.0
+      source:
+        type: repo
+        location: https://helm.traefik.io/traefik
+    state: present
+    name: traefik
+    namespace: ingress

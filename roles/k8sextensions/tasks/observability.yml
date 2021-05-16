@@ -1,0 +1,45 @@
+---
+# Setup kube-prometheus
+# https://github.com/prometheus-operator/kube-prometheus#installing
+- name: checkout kube-prometheus
+  git:
+    repo: 'https://github.com/prometheus-operator/kube-prometheus.git'
+    dest: /tmp/k8s/kube-prometheus
+    version: v0.8.0
+
+- name: install prometheus-operator
+  shell: kubectl apply -f /tmp/k8s/kube-prometheus/manifests/setup
+
+- name: wait for kubeconfig to be created
+  shell: until kubectl get servicemonitors --all-namespaces ; do date; sleep 1; echo ""; done
+
+# https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/prometheus-prometheus.yaml
+- name: add longhorn pvc to the prometheus statefulset
+  blockinfile:
+    path: /tmp/k8s/kube-prometheus/manifests/prometheus-prometheus.yaml
+    insertafter: EOF
+    block: |
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: longhorn
+            resources:
+              requests:
+                storage: 2Gi
+
+- name: install kube-prometheus to monitor the cluster
+  shell: kubectl apply -f /tmp/k8s/kube-prometheus/manifests/
+
+- name: copy the files to /tmp/k8s/extensions
+  become: yes
+  become_method: sudo
+  copy:
+    src: "{{ item }}"
+    dest: /tmp/k8s/extensions
+    owner: "root"
+    mode: 0655
+  with_fileglob:
+    - files/*
+
+- name: setup ingress to prometheus and grafana
+  shell: kubectl apply -f /tmp/k8s/extensions/observability-ingress.yaml

@@ -1,0 +1,8 @@
+---
+- include: ingress.yml
+
+- include: cert-manager.yml
+
+- include: storage.yml
+
+- include: observability.yml
