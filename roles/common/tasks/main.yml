@@ -6,6 +6,8 @@
     name: "{{ inventory_hostname }}"
 # Updates the apt cache and installs minimum required software after installing updates
 - include: packages.yml
+# setup tailscale to enable wireguard connectivity between the loadbalancer and nodes
+- include: tailscale.yml
 # Sets up the /etc/hosts file
 - include: hostfile.yml
 # Disables bluetooth and wifi

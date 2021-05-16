@@ -15,6 +15,15 @@
   when: inventory_hostname in groups['masters'] and hostvars[item].ansible_host is defined
   with_items: "{{ groups.workers }}"
 
+- name: add master to worker nodes hosts file
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{ item }}"
+    state: present
+  when: inventory_hostname in groups['workers'] and hostvars[item].ansible_host is defined
+  with_items: "{{ groups.masters }}"
+
 - name: add IP address of all hosts tailscale IPs to the loadbalancers
   lineinfile:
     dest: /etc/hosts
