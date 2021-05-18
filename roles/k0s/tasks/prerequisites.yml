@@ -8,14 +8,15 @@
     replace: '\1cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory \2'
   register: enable_cgroups
 
-- name: copy the modules file across for k0s
+- name: enable the necessary modules required for k0s
   become: yes
   become_method: sudo
-  copy:
-    src: files/modules.conf
-    dest: /etc/modules
-    owner: "root"
-    mode: 0644
+  blockinfile:
+    path: /etc/modules
+    block: |
+      modprobe overlay
+      modprobe nf_conntrack
+      modprobe br_netfilter
   register: enable_modules
 
 - name: "reboot and wait until ready"
@@ -29,10 +30,6 @@
     post_reboot_delay: 30
     test_command: whoami
   when: enable_cgroups.changed or enable_modules.changed
-
-- name: check whether k0s has been installed before
-  stat:
-    path: /usr/bin/k0s
 
 - name: download k0s version '{{ k0s_version }}'
   become: yes

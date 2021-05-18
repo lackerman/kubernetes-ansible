@@ -9,7 +9,7 @@
 - name: add all workers to master nodes hosts files
   lineinfile:
     dest: /etc/hosts
-    regexp: '.*{{ item }}$'
+    regexp: "{{ hostvars[item].ansible_host }}.*$"
     line: "{{ hostvars[item].ansible_host }} {{ item }}"
     state: present
   when: inventory_hostname in groups['masters'] and hostvars[item].ansible_host is defined
@@ -18,7 +18,7 @@
 - name: add master to worker nodes hosts file
   lineinfile:
     dest: /etc/hosts
-    regexp: '.*{{ item }}$'
+    regexp: "{{ hostvars[item].ansible_host }}.*$"
     line: "{{ hostvars[item].ansible_host }} {{ item }}"
     state: present
   when: inventory_hostname in groups['workers'] and hostvars[item].ansible_host is defined
@@ -27,7 +27,7 @@
 - name: add IP address of all hosts tailscale IPs to the loadbalancers
   lineinfile:
     dest: /etc/hosts
-    regexp: '.*{{item}}.vpn$'
+    regexp: "{{ hostvars[item].vpn }}.*$"
     line: "{{ hostvars[item].vpn }} {{item}}.vpn"
     state: present
   when: inventory_hostname in groups['loadbalancers'] and hostvars[item].vpn is defined

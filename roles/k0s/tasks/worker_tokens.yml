@@ -1,0 +1,22 @@
+---
+- name: generate token
+  become: yes
+  become_method: sudo
+  shell: k0s token create --role worker --expiry "5m"
+  register: node_token
+
+- name: ensure the directory exists
+  become: yes
+  become_method: sudo
+  file:
+    path: /var/lib/k0s
+    state: directory
+  delegate_to: "{{ node }}"
+
+- name: copy the join token to the node
+  become: yes
+  become_method: sudo
+  copy:
+    content: "{{ node_token.stdout }}"
+    dest: /var/lib/k0s/join-token
+  delegate_to: "{{ node }}"
