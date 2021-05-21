@@ -1,8 +1,27 @@
 ---
-- include: ingress.yml
+- pip:
+    name:
+      - openshift
+      - kubernetes
+      - kubernetes-validate
+  become: True
 
-- include: cert-manager.yml
+- name: install "helm" with option --classic
+  community.general.snap:
+    name: helm
+    classic: yes
+
+- name: ensure the extensions directory exists
+  file:
+    path: "{{ extensions_dir }}"
+    state: directory
+
+- include: loadbalancer.yml
+
+- include: ingress.yml
 
 - include: storage.yml
 
 - include: observability.yml
+
+#- include: cert-manager.yml

@@ -1,0 +1,75 @@
+---
+- name: "[loadbalancer] ensure the extensions directory exists"
+  file:
+    path: "{{ extensions_dir }}/metallb"
+    state: directory
+
+- name: "[loadbalancer] get the metallb manifests 'namespace.yaml'"
+  get_url:
+    url: https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/namespace.yaml
+    dest: "{{ extensions_dir }}/metallb/namespace.yaml"
+    mode: '0664'
+
+- name: "[loadbalancer] get the metallb manifests 'metallb.yaml'"
+  get_url:
+    url: https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/metallb.yaml
+    dest: "{{ extensions_dir }}/metallb/metallb.yaml"
+    mode: '0664'
+
+- name: "[loadbalancer] deploy the metallb manifests 'namespace.yaml'"
+  k8s:
+    state: present
+    src: "{{ extensions_dir }}/metallb/namespace.yaml"
+    validate:
+      fail_on_error: yes
+
+- name: "[loadbalancer] deploy the metallb manifests 'metallb.yaml'"
+  k8s:
+    state: present
+    src: "{{ extensions_dir }}/metallb/metallb.yaml"
+    validate:
+      fail_on_error: yes
+
+- name: "[loadbalancer] check that the metallb secret exists"
+  shell: kubectl get secrets -n metallb-system --no-headers
+  register: existing_secret
+
+- name: "[loadbalancer] generate metallb secret"
+  shell: openssl rand -base64 128
+  register: secret
+  when: "'memberlist' not in existing_secret.stdout"
+
+- name: "[loadbalancer] install the metallb secret (only of 1st installation)"
+  when: "'memberlist' not in existing_secret.stdout"
+  k8s:
+    state: present
+    validate:
+      fail_on_error: yes
+    definition:
+      apiVersion: v1
+      kind: Secret
+      data:
+        secretkey: "{{ secret.stdout }}"
+      metadata:
+        name: memberlist
+        namespace: metallb-system
+      type: Opaque
+
+- name: "[loadbalancer] install the metallb configmap for Layer2 IPs"
+  k8s:
+    state: present
+    validate:
+      fail_on_error: yes
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        namespace: metallb-system
+        name: config
+      data:
+        config: |
+          address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+            - 192.168.144.10-192.168.144.12

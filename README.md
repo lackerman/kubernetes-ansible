@@ -7,7 +7,7 @@
 - make sure to set the variables in [group_vars/all](group_vars/all) to use either
   the default ubuntu or Raspberry Pi OS user and config files.
 - Make sure you have the `openshift` pip package for interacting with kubernetes
-    ```python
+    ```shell script
     pip install openshift kubernetes kubernetes-validate
     ```
 
@@ -22,6 +22,11 @@
       > For an ubuntu disk, use the [disk_setup.sh](disk_setup.sh) file
 
 ## ansible helper commands
+
+Ansible plugins:
+```
+ansible-galaxy collection install community.kubernetes
+```
 
 This playbook sets up a k3s cluster on the specified hosts.
 

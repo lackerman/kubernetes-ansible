@@ -1,13 +1,15 @@
 ---
-- name: Install helm chart
-  helm:
-    host: localhost
-    chart:
-      name: traefik
-      version: 9.11.0
-      source:
-        type: repo
-        location: https://helm.traefik.io/traefik
+- name: "[ingress] create the 'ingress' namespace"
+  k8s:
+    name: ingress
+    api_version: v1
+    kind: Namespace
     state: present
-    name: traefik
-    namespace: ingress
+
+- name: "[ingress] install 'traefik' helm chart"
+  community.kubernetes.helm:
+    chart_ref: traefik
+    chart_repo_url: "https://helm.traefik.io/traefik"
+    chart_version: "{{ traefik_helm_version }}"
+    release_name: traefik
+    release_namespace: ingress
