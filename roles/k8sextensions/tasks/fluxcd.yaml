@@ -1,0 +1,13 @@
+curl -s https://fluxcd.io/install.sh | sudo bash
+
+- name: "[flxucd] get the fluxcd cli tool"
+  get_url:
+    url: https://fluxcd.io/install.sh
+    dest: "{{ extensions_dir }}/fluxcd/install.sh"
+    mode: '0664'
+
+- name: install fluxcd controller
+  shell: "{{ extensions_dir }}/fluxcd/install.sh"
+  environment:
+    GITHUB_USER: "server"
+    GITHUB_TOKEN: true

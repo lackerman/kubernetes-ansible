@@ -17,11 +17,6 @@ traefik_helm_version: "9.11.0"
 apiserver_url: "https://knode0:6443"
 extensions_dir: "/tmp/k8s/extensions"
 
-# Email used by cert-manager to to notify you
-# if there were issues registering the certificate
-email:
-domain:
-
 #############################################
 # For RaspberryOS uncomment the following
 #############################################

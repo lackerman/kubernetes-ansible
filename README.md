@@ -23,12 +23,20 @@
 
 ## ansible helper commands
 
-Ansible plugins:
-```
-ansible-galaxy collection install community.kubernetes
+Start by setting up the ansible vault
+```shell script
+cat >> .secret <<EOF
+# Email used by cert-manager to to notify you
+# if there were issues registering the certificate
+email: <enter-email>
+domain: <enter-domain>
+git_username: <enter-github-username>
+git_token: <enter-github-token>
+EOF
+ansible-vault create .vault
 ```
 
-This playbook sets up a k3s cluster on the specified hosts.
+This playbook sets up a k8s cluster on the specified hosts.
 
 > Using the [disk_setup.sh](disk_setup.sh) script listed, ubuntu
 > is already setup to use public key auth. However, for Raspberry Pi OS

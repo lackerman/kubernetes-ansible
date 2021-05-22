@@ -1,16 +1,13 @@
 [masters]
-knode0  ansible_host=xxx.xxx.xxx.xxx
+knode0  ansible_host=192.168.144.5
 
 [workers]
-knode1  ansible_host=xxx.xxx.xxx.xxx    vpn=xxx.xxx.xxx.xxx
-knode2  ansible_host=xxx.xxx.xxx.xxx    vpn=xxx.xxx.xxx.xxx
-knode3  ansible_host=xxx.xxx.xxx.xxx    vpn=xxx.xxx.xxx.xxx
+knode1  ansible_host=192.168.144.4
 
+# The loadbalancer is the remote (cloud-based) instance that will route traffic to the cluster
 [loadbalancers]
-loadbalancer ansible_host=xxx.xxx.xxx.xxx
+#loadbalancer ansible_host=
 
 [rpis]
 knode0
 knode1
-knode2
-knode3

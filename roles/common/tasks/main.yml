@@ -1,4 +1,10 @@
 ---
+- name: include the secret variables
+  include_vars: .secret
+
+- debug:
+    msg: "{{ email }}"
+
 # Creates the new user and sets up the ssh config
 - include: user_ssh.yml
 # sets the hostname of the machine
