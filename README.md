@@ -1,4 +1,4 @@
-# RPi K3s cluster playbook
+# RPi K8s cluster playbook
 
 ## prerequisites
 
