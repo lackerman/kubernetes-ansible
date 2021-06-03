@@ -75,6 +75,7 @@
     state: absent
     remove: yes
     force: yes
+  when: remove_default_user
 
 - name: "remove welcome messages"
   file:

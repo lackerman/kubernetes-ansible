@@ -55,8 +55,12 @@
     group: "{{ ansible_env.USER }}"
     mode: '0644'
 
+- name: copy kubeconfig locally
+  fetch:
+    src: "{{ ansible_env.HOME }}/.kube/config"
+    dest: /tmp/k0sconfig
 - name: generate tokens
-  include_tasks: worker_tokens.yml
+  include_tasks: workers_tokens.yml
   with_items: "{{ groups['workers'] }}"
   loop_control:
     loop_var: node

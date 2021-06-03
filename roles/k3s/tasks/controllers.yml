@@ -47,13 +47,13 @@
   become_method: sudo
   slurp:
     src: /var/lib/rancher/k3s/server/node-token
-  register: node_token
+  register: worker_token
 
 - set_fact:
-    node_token: "{{ node_token.content | b64decode | replace('\n', '') }}"
+    worker_token: "{{ worker_token.content | b64decode | replace('\n', '') }}"
 
-- name: set the node_password needed by workers to join the cluster
-  set_fact: node_password="{{ node_token }}"
+- name: set the node_password needed by agent nodes to join the cluster
+  set_fact: node_password="{{ worker_token }}"
   delegate_to: "{{ item }}"
   delegate_facts: True
   loop: "{{ groups['workers'] }}"

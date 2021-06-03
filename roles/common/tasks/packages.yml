@@ -46,6 +46,42 @@
 
     - name: "kubectl: download the file"
       get_url:
-        url: "https://dl.k8s.io/release/{{ kubectl_version.content }}/bin/linux/arm64/kubectl"
+        url: "https://dl.k8s.io/release/{{ kubectl_version.content }}/bin/linux/{{ arch }}/kubectl"
         dest: /usr/local/bin/kubectl
         mode: '0755'
+
+- pip:
+    name:
+      - openshift
+      - kubernetes
+      - kubernetes-validate
+
+- name: install "helm" with option --classic
+  community.general.snap:
+    name: helm
+    classic: yes
+
+- name: "crictl: check if it is already installed"
+  stat:
+    path: /usr/local/bin/crictl
+  register: crictl_stat_result
+
+- name: "crictl: install"
+  when: not crictl_stat_result.stat.exists
+  block:
+  - name: "crictl: download crictl version '{{ crictl_version }}'"
+    get_url:
+      url: https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ crictl_version }}/crictl-{{ crictl_version }}-linux-{{ arch }}.tar.gz
+      dest: /tmp/crictl-{{ crictl_version }}-linux-{{ arch }}.tar.gz
+      mode: '0755'
+
+  - name: "crictl: Extract the tarball"
+    unarchive:
+      src: /tmp/crictl-{{ crictl_version }}-linux-{{ arch }}.tar.gz
+      dest: /usr/local/bin
+      remote_src: yes
+
+  - name: "crictl: delete tarball"
+    file:
+      state: absent
+      path: /tmp/crictl-{{ crictl_version }}-linux-{{ arch }}.tar.gz

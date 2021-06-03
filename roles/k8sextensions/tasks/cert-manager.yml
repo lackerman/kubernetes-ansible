@@ -24,6 +24,7 @@
     path: "{{ extensions_dir }}/cert-manager/cert-manager.yaml"
     regexp: '^(\s+)(image:.*):(v.*)$'
     replace: '\1\2-arm:\3'
+  when: arch == "arm64"
 
 - name: "[cert management] deploy cert-manager"
   k8s:

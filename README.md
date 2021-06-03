@@ -1,15 +1,13 @@
 # RPi K8s cluster playbook
 
+This playbook sets up a k8s cluster on the specified hosts.
+
 ## prerequisites
 
 - Public key already setup in the default `$HOME/.ssh` folder, named `id_rsa.pub`
     - use `ssh-keygen` to setup a new public-private key pair if you haven't already
 - make sure to set the variables in [group_vars/all](group_vars/all) to use either
   the default ubuntu or Raspberry Pi OS user and config files.
-- Make sure you have the `openshift` pip package for interacting with kubernetes
-    ```shell script
-    pip install openshift kubernetes kubernetes-validate
-    ```
 
 ## manual steps
 
@@ -21,9 +19,11 @@
       > In the case of Mac, open a terminal and enter `touch /Volumes/boot/ssh`
       > For an ubuntu disk, use the [disk_setup.sh](disk_setup.sh) file
 
-## ansible helper commands
+## running the ansible scripts
 
-Start by setting up the ansible vault
+### prerequisites
+
+Start by setting up some "secret" variables
 ```shell script
 cat >> .secret <<EOF
 # Email used by cert-manager to to notify you
@@ -33,10 +33,9 @@ domain: <enter-domain>
 git_username: <enter-github-username>
 git_token: <enter-github-token>
 EOF
-ansible-vault create .vault
 ```
 
-This playbook sets up a k8s cluster on the specified hosts.
+### validate the playbook
 
 > Using the [disk_setup.sh](disk_setup.sh) script listed, ubuntu
 > is already setup to use public key auth. However, for Raspberry Pi OS
@@ -44,7 +43,6 @@ This playbook sets up a k8s cluster on the specified hosts.
 > to do this you will need to install paramiko using `pip install paramiko`
 > on the host machine.
 
-In order to validate the playbook, execute the following:
 ```shell script
 # Raspberry Pi OS
 ansible-playbook -i hosts site.yml --check --ask-pass
@@ -52,14 +50,17 @@ ansible-playbook -i hosts site.yml --check --ask-pass
 ansible-playbook -i hosts site.yml --check
 ```
 
-For Raspberry Pi OS, the playbook has to be executed twice. On the first run ansible will
-setup a user, based on the current `USER` environment variable, thereafter, it uses public
-keys for ssh (based on the default `$HOME/.ssh/id_rsa.pub` key).
-> I could not get paramiko to reset the ssh connection (to swap from password-based auth to
-> public-private key auth) without throwing an error. As a result, the playbook has to be
-> executed twice to get it setup.
+### first run
+
+For Raspberry Pi OS, the playbook has to be executed twice. On the first
+run ansible will setup a user, based on the current `USER` environment
+variable, thereafter, it uses public keys for ssh (based on the default
+`$HOME/.ssh/id_rsa.pub` key).
+> I could not get paramiko to reset the ssh connection (to swap from
+> password-based auth to public-private key auth) without throwing
+> an error. As a result, the playbook has to be executed twice
+> to get it setup.
   
-Raspberry Pi OS first run:
 ```shell script
 ansible-playbook -i hosts site.yml -c paramiko --ask-pass
 # This should fail with the following error
@@ -71,25 +72,39 @@ For subsequent runs, or when setting up Ubuntu, you can simply execute
 ansible-playbook -i hosts site.yml
 ```
 
+### supplying extra variables
+
 You can supply extra variables at execution by calling providing the `--extra-vars`
 flag when executing `ansible-playbook`. For example:
 ```shell script
 ansible-playbook -i hosts site.yml --extra-vars "my_custom_var=my_custom_value"
 ```
 
-Execute a specific task? Then use tags. For example the command below will
-execute all the plays in common because the role was tagged as `common`
+### execute specific plays or tasks
+
+If you want to execute specific plays or tasks, then use tags.
+For example the command below will execute all the plays in
+common because the role was tagged as `common`
 ```shell script
 ansible-playbook -i hosts site.yml --tags "common"
 # Or as a specific user with a become password
 ansible-playbook -i hosts site.yml --tags "common" --user ubuntu --ask-become-pass
 ```
 
+### execute playbook with different user or private key
+
+```shell script
+ansible-playbook -i hosts -u root --private-key="<>" site.yml 
+```
+
+### debugging
+
 For debugging use the `-vvv` flag to print verbose messages during execution. 
 
-### Setup certs
+### setup certs
 
 https://certbot.eff.org/instructions
+
 
 [setup_sd_card]: https://garywoodfine.com/how-to-create-raspbian-sd-card-ubuntu/
 [raspbian_buster]: https://www.raspberrypi.org/downloads/raspbian/

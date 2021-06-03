@@ -2,7 +2,7 @@
 - name: populate service facts
   service_facts:
 
-- name: install k0s service for agent nodes
+- name: install k0s service on workers
   become: yes
   become_method: sudo
   when: 'ansible_facts.services["k0sworker.service"] is not defined'
@@ -20,7 +20,7 @@
       systemd:
         daemon_reload: yes
 
-    - name: start k0s
+    - name: start k0s worker
       systemd:
         state: started
         name: k0sworker

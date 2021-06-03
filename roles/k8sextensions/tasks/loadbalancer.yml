@@ -39,7 +39,7 @@
   register: secret
   when: "'memberlist' not in existing_secret.stdout"
 
-- name: "[loadbalancer] install the metallb secret (only of 1st installation)"
+- name: "[loadbalancer] install the metallb secret (only on 1st installation)"
   when: "'memberlist' not in existing_secret.stdout"
   k8s:
     state: present
@@ -72,4 +72,4 @@
           - name: default
             protocol: layer2
             addresses:
-            - 192.168.144.10-192.168.144.12
+            - 192.168.64.250-192.168.64.253

@@ -1,25 +1,4 @@
 ---
-- name: check if the container features have been enabled
-  become: yes
-  become_method: sudo
-  replace:
-    path: "{{ cmdline_config }}"
-    regexp: '^(?!.*cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory)(.*?)(console=tty1 .+)$'
-    replace: '\1cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory \2'
-  register: enable_cgroups
-
-- name: "reboot and wait until ready"
-  become: yes
-  become_method: sudo
-  reboot:
-    msg: "Reboot initiated by ansible"
-    connect_timeout: 5
-    reboot_timeout: 600
-    pre_reboot_delay: 0
-    post_reboot_delay: 30
-    test_command: whoami
-  when: enable_cgroups.changed
-
 - name: check whether k3s has been installed before
   stat:
     path: /usr/local/bin/k3s

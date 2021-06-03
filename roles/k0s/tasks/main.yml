@@ -1,8 +1,10 @@
 ---
 - include: prerequisites.yml
+  become: yes
+  become_method: sudo
 
-- include: masters.yml
-  when: inventory_hostname in groups['masters']
+- include: controllers.yml
+  when: inventory_hostname in groups['controllers']
 
 - include: workers.yml
   when: inventory_hostname in groups['workers']

@@ -1,8 +1,8 @@
 ---
 - include: prerequisites.yml
 
-- block:
-  - include: masters.yml
-    when: inventory_hostname in groups['masters']
-  - include: workers.yml
-    when: inventory_hostname in groups['workers']
+- include: controllers.yml
+  when: inventory_hostname in groups['controllers']
+
+- include: workers.yml
+  when: inventory_hostname in groups['workers']
