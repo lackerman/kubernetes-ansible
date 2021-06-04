@@ -59,6 +59,8 @@
   fetch:
     src: "{{ ansible_env.HOME }}/.kube/config"
     dest: /tmp/k0sconfig
+    flat: yes
+
 - name: generate tokens
   include_tasks: workers_tokens.yml
   with_items: "{{ groups['workers'] }}"
