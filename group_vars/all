@@ -5,10 +5,12 @@ ansible_python_interpreter: /usr/bin/python3
 create_user: "{{ lookup('env','USER') }}"
 copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
-is_rpi: false
+# Hardware features
+disable_wifi: true
+enable_i2c_displays: false
 
 # Kubernetes version variables
-arch: amd64 # arm64
+arch: arm64
 k0s_version: v1.21.0+k0s.0
 crictl_version: v1.21.0
 k3s_version: v1.20.5+k3s1

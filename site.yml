@@ -7,13 +7,14 @@
   roles:
     - role: common
 
-- hosts: rpis
+- hosts: all
   become: yes
   become_method: sudo
   gather_facts: no
   tags: displays
   roles:
     - role: displays
+      when: enable_i2c_displays
 
 - hosts: rpis
   tasks:

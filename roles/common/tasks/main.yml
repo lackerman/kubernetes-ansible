@@ -14,4 +14,4 @@
 - include: hostfile.yml
 # Disables bluetooth and wifi
 - include: disable_wifi_radio.yml
-  when: is_rpi
+  when: disable_wifi
