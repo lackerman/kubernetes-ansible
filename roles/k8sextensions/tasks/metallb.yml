@@ -1,45 +1,54 @@
 ---
-- name: "[loadbalancer] ensure the extensions directory exists"
+#######################################################################
+# MetalLB setup instructions
+#   https://metallb.universe.tf/installation/#installation-by-manifest
+#######################################################################
+
+- name: (metallb) set the extension directory for grafana cloud
+  set_fact:
+    metallb_ext_dir: "{{ extensions_dir }}/metallb"
+
+- name: (metallb) ensure the extensions directory exists
   file:
-    path: "{{ extensions_dir }}/metallb"
+    path: "{{ metallb_ext_dir }}"
     state: directory
 
-- name: "[loadbalancer] get the metallb manifests 'namespace.yaml'"
+- name: (metallb) get the metallb manifests 'namespace.yaml'
   get_url:
     url: https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/namespace.yaml
-    dest: "{{ extensions_dir }}/metallb/namespace.yaml"
+    dest: "{{ metallb_ext_dir }}/namespace.yaml"
     mode: '0664'
 
-- name: "[loadbalancer] get the metallb manifests 'metallb.yaml'"
+- name: (metallb) get the metallb manifests 'metallb.yaml'
   get_url:
     url: https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/metallb.yaml
-    dest: "{{ extensions_dir }}/metallb/metallb.yaml"
+    dest: "{{ metallb_ext_dir }}/metallb.yaml"
     mode: '0664'
 
-- name: "[loadbalancer] deploy the metallb manifests 'namespace.yaml'"
+- name: (metallb) deploy the metallb manifests 'namespace.yaml'
   k8s:
     state: present
-    src: "{{ extensions_dir }}/metallb/namespace.yaml"
+    src: "{{ metallb_ext_dir }}/namespace.yaml"
     validate:
       fail_on_error: yes
 
-- name: "[loadbalancer] deploy the metallb manifests 'metallb.yaml'"
+- name: (metallb) deploy the metallb manifests 'metallb.yaml'
   k8s:
     state: present
-    src: "{{ extensions_dir }}/metallb/metallb.yaml"
+    src: "{{ metallb_ext_dir }}/metallb.yaml"
     validate:
       fail_on_error: yes
 
-- name: "[loadbalancer] check that the metallb secret exists"
+- name: (metallb) check that the metallb secret exists
   shell: kubectl get secrets -n metallb-system --no-headers
   register: existing_secret
 
-- name: "[loadbalancer] generate metallb secret"
+- name: (metallb) generate metallb secret
   shell: openssl rand -base64 128
   register: secret
   when: "'memberlist' not in existing_secret.stdout"
 
-- name: "[loadbalancer] install the metallb secret (only on 1st installation)"
+- name: (metallb) install the metallb secret (only on 1st installation)
   when: "'memberlist' not in existing_secret.stdout"
   k8s:
     state: present
@@ -55,7 +64,7 @@
         namespace: metallb-system
       type: Opaque
 
-- name: "[loadbalancer] install the metallb configmap for Layer2 IPs"
+- name: (metallb) install the metallb configmap for Layer2 IPs
   k8s:
     state: present
     validate:

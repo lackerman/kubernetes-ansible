@@ -1,0 +1,61 @@
+---
+######################################################################
+# Kube Prometheus setup instructions:
+#   https://github.com/prometheus-operator/kube-prometheus#installing
+######################################################################
+
+- name: (kube-prometheus) set the extension directory for grafana cloud
+  set_fact:
+    kube_prom_ext_dir: "{{ extensions_dir }}/kube-prometheus"
+
+- name: (kube-prometheus) checkout kube-prometheus
+  git:
+    repo: "https://github.com/prometheus-operator/kube-prometheus.git"
+    dest: "{{ kube_prom_ext_dir }}"
+    version: "{{ prometheus_operator_version }}"
+    force: yes
+
+- name: (kube-prometheus) deploy kube-prometheus
+  shell: kubectl apply -f "{{ kube_prom_ext_dir }}/manifests/setup"
+
+- name: (kube-prometheus) wait for kubeconfig to be created
+  shell: until kubectl get servicemonitors --all-namespaces ; do date; sleep 1; echo ""; done
+
+# https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/prometheus-prometheus.yaml
+- name: (kube-prometheus) add pvc to the prometheus statefulset
+  blockinfile:
+    path: "{{ kube_prom_ext_dir }}/manifests/prometheus-prometheus.yaml"
+    insertafter: EOF
+    block: |2 # 2 is for indenting
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              resources:
+                requests:
+                  storage: 2Gi
+
+- name: (kube-prometheus) install kube-prometheus to monitor the cluster
+  shell: kubectl apply -f "{{ kube_prom_ext_dir }}/manifests/"
+
+- name: (kube-prometheus) ensure the extensions directory exists"
+  file:
+    path: "{{ kube_prom_ext_dir }}/manifests/ingress"
+    state: directory
+
+- name: (kube-prometheus) copy the files to extensions directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ kube_prom_ext_dir }}/manifests/ingress/"
+  with_fileglob:
+    - files/*
+
+- name: (kube-prometheus) deploy the kube-prometheus ingress
+  k8s:
+    state: present
+    namespace: monitoring
+    src: "{{ kube_prom_ext_dir }}/manifests/ingress/kube-prometheus-ingress.yaml"
+    validate:
+      fail_on_error: yes
+
+#TODO: Add the Grafana dashboard for the cluster

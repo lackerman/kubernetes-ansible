@@ -1,0 +1,25 @@
+---
+#########################################################################
+# Longhorn setup instructions:
+#   https://longhorn.io/docs/1.1.1/deploy/install/install-with-kubectl/
+#########################################################################
+
+- name: (longhorn storage) set the extension directory for grafana cloud
+  set_fact:
+    longhorn_ext_dir: "{{ extensions_dir }}/longhorn-storage"
+
+- name: (longhorn storage) ensure the extension directory exists
+  file:
+    path: "{{ longhorn_ext_dir }}"
+    state: directory
+
+- name: (longhorn storage) download the longhorn operator yaml
+  get_url:
+    url: "https://raw.githubusercontent.com/longhorn/longhorn/{{ longhorn_version }}/deploy/longhorn.yaml"
+    dest: "{{ longhorn_ext_dir }}/longhorn.yaml"
+    mode: '0664'
+
+- name: (longhorn storage) install the longhorn operator
+  k8s:
+    state: present
+    src: "{{ longhorn_ext_dir }}/longhorn.yaml"

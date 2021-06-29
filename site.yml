@@ -49,6 +49,7 @@
     - role: k0s # or k3s
 
 - hosts: controllers
+  tags: k8sextensions
   roles:
     - role: k8sextensions
 

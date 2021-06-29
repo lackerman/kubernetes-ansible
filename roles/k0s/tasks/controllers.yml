@@ -26,6 +26,7 @@
         regexp: '^Environment="ETCD_UNSUPPORTED_ARCH=arm64"'
         line: 'Environment="ETCD_UNSUPPORTED_ARCH=arm64"'
         state: present
+      when: arch == "arm64"
 
     - name: force systemd to reread configs (2.4 and above)
       systemd:

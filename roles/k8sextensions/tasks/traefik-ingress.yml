@@ -1,0 +1,21 @@
+---
+#######################################################################################
+# Traefik Ingress instructions:
+#   https://doc.traefik.io/traefik/getting-started/install-traefik/#use-the-helm-chart
+#   https://traefik.io/blog/from-zero-to-hero-getting-started-with-k0s-and-traefik/
+#######################################################################################
+
+- name: (traefik ingress) create the 'ingress' namespace
+  k8s:
+    name: ingress
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: (traefik ingress) install 'traefik' helm chart
+  community.kubernetes.helm:
+    chart_ref: traefik
+    chart_repo_url: "https://helm.traefik.io/traefik"
+    chart_version: "{{ traefik_helm_version }}"
+    release_name: traefik
+    release_namespace: ingress

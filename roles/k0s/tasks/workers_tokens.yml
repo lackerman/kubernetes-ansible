@@ -2,7 +2,7 @@
 - name: generate token
   become: yes
   become_method: sudo
-  shell: k0s token create --role worker --expiry "5m"
+  shell: k0s token create --role worker --expiry 5m
   register: node_token
 
 - name: ensure the directory exists

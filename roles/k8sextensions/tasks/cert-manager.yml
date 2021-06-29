@@ -1,39 +1,45 @@
 ---
-# ----
-# A great guide which helped me set everything up
+################################################################
+# Cert Manager setup instructions:
+#   Great guide which helped me set everything up
 #   https://opensource.com/article/20/3/ssl-letsencrypt-k3s
-# ----
-- name: "[cert management] ensure the extensions directory exists"
+################################################################
+
+- name: (cert management) set the extension directory for cert management
+  set_fact:
+    cert_man_ext_dir: "{{ extensions_dir }}/cert-manager"
+
+- name: (cert management) ensure the extensions directory exists
   file:
-    path: "{{ extensions_dir }}/cert-manager"
+    path: "{{ cert_man_ext_dir }}"
     state: directory
 
-- name: "[cert management] remove previous versions of the cert-manager manifest"
+- name: (cert management) remove previous versions of the cert-manager manifest
   file:
-    path: "{{ extensions_dir }}/cert-manager/cert-manager.yaml"
+    path: "{{ cert_man_ext_dir }}/cert-manager.yaml"
     state: absent
 
-- name: "[cert management] download cert-manager yaml for version '{{ cert_manager_version }}'"
+- name: (cert management) download cert-manager yaml for version '{{ cert_manager_version }}'
   get_url:
     url: "https://github.com/jetstack/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.yaml"
-    dest: "{{ extensions_dir }}/cert-manager/cert-manager.yaml"
+    dest: "{{ cert_man_ext_dir }}/cert-manager.yaml"
     mode: '0755'
 
-- name: "[cert management] update the yaml to use the arm images of cert-manager"
+- name: (cert management) update the yaml to use the arm images of cert-manager
   replace:
-    path: "{{ extensions_dir }}/cert-manager/cert-manager.yaml"
+    path: "{{ cert_man_ext_dir }}/cert-manager.yaml"
     regexp: '^(\s+)(image:.*):(v.*)$'
     replace: '\1\2-arm:\3'
   when: arch == "arm64"
 
-- name: "[cert management] deploy cert-manager"
+- name: (cert management) deploy cert-manager
   k8s:
     state: present
-    src: "{{ extensions_dir }}/cert-manager/cert-manager.yaml"
+    src: "{{ cert_man_ext_dir }}/cert-manager.yaml"
     validate:
       fail_on_error: yes
 
-- name: "[cert management] create letsencrypt staging certificate issuer"
+- name: (cert management) create letsencrypt staging certificate issuer
   k8s:
     state: present
     validate:
@@ -58,7 +64,7 @@
                 ingress:
                   class: traefik
 
-- name: "[cert management] create letsencrypt production certificate issuer"
+- name: (cert management) create letsencrypt production certificate issuer
   k8s:
     state: present
     validate:

@@ -1,16 +1,29 @@
-# https://fluxcd.io/docs/get-started/
+---
+########################################
+# Flux CD setup instructions
+#   https://fluxcd.io/docs/get-started/
+########################################
 
-- name: include the secret variables
+- name: (fluxcd) set the extension directory for fluxcd
+  set_fact:
+    fluxcd_ext_dir: "{{ extensions_dir }}/fluxcd"
+
+- name: (fluxcd) ensure the extensions directory exists
+  file:
+    path: "{{ fluxcd_ext_dir }}"
+    state: directory
+
+- name: (fluxcd) include the secret variables
   include_vars: .secret
 
-- name: "[fluxcd] get the fluxcd cli tool"
+- name: (fluxcd) get the fluxcd cli tool
   get_url:
     url: https://fluxcd.io/install.sh
-    dest: "{{ extensions_dir }}/fluxcd/install.sh"
+    dest: "{{ fluxcd_ext_dir }}/install.sh"
     mode: '0664'
 
-- name: "[fluxcd] install fluxcd controller"
-  shell: "{{ extensions_dir }}/fluxcd/install.sh"
+- name: (fluxcd) install fluxcd controller
+  shell: "{{ fluxcd_ext_dir }}/install.sh"
   environment:
     GITHUB_USER: "{{ git_username }}"
     GITHUB_TOKEN: "{{ git_token }}"

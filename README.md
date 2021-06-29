@@ -32,6 +32,12 @@ email: <enter-email>
 domain: <enter-domain>
 git_username: <enter-github-username>
 git_token: <enter-github-token>
+grafana_cloud_loki_username: <grafana-cloud-loki-username>
+grafana_cloud_loki_password: <grafana-cloud-loki-password>
+grafana_cloud_prom_username: <grafana-cloud-prom-username>
+grafana_cloud_prom_password: <grafana-cloud-prom-password>
+grafana_cloud_tempo_username: <grafana-cloud-tempo-username>
+grafana_cloud_tempo_password: <grafana-cloud-tempo-password>
 EOF
 ```
 
@@ -100,6 +106,11 @@ ansible-playbook -i hosts -u root --private-key="<>" site.yml
 ### debugging
 
 For debugging use the `-vvv` flag to print verbose messages during execution. 
+
+Print all facts
+```shell script
+ansible -i hosts <hosts: all, knode0, etc> -m setup
+```
 
 ### setup certs
 

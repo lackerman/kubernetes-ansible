@@ -4,12 +4,16 @@
     path: "{{ extensions_dir }}"
     state: directory
 
-- include: loadbalancer.yml
+- include: metallb.yml
 
-- include: ingress.yml
+- include: traefik-ingress.yml
 
-- include: storage.yml
+- include: longhorn-storage.yml
 
-#- include: observability.yml
+#- include: kube-prometheus-obs.yml
+
+- include: grafana-cloud-obs.yml
 
 - include: cert-manager.yml
+
+#- include: fluxcd.yaml

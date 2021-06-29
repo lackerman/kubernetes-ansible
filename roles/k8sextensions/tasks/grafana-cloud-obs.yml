@@ -1,0 +1,46 @@
+---
+##################################################################
+# Grafana Cloud setup instructions:
+#   Tempo: https://grafana.com/docs/tempo/latest/getting-started/
+##################################################################
+
+- name: (grafana cloud) set the extension directory for grafana cloud
+  set_fact:
+    grafana_cloud_ext_dir: "{{ extensions_dir }}/grafana-cloud"
+    observability_namespace: observability
+    grafana_cloud_manifests:
+      - 'grafana-agent-cm.yaml'
+      - 'grafana-agent-deployment.yaml'
+      - 'grafana-promtail-cm.yaml'
+      - 'grafana-promtail-deployment.yaml'
+
+- name: (grafana cloud) ensure the extensions directory exists
+  file:
+    path: "{{ grafana_cloud_ext_dir }}"
+    state: directory
+
+- name: (grafana cloud) include the secret variables
+  include_vars: .secret
+
+- name: (grafana cloud) create the '{{ observability_namespace }}' namespace
+  k8s:
+    name: "{{ observability_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: (grafana cloud) copy across the agent config map
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ grafana_cloud_ext_dir }}/{{ item }}"
+  loop: "{{ grafana_cloud_manifests }}"
+
+- name: (grafana cloud) apply the kubernetes manifests
+  shell: kubectl apply -f "{{ grafana_cloud_ext_dir }}/{{ item }}"
+  loop: "{{ grafana_cloud_manifests }}"
+
+- name: (grafana cloud) restart the grafana agent deployment
+  shell: kubectl rollout -n "{{ observability_namespace }}" restart ds/grafana-agent
+
+- name: (grafana cloud) restart the promtail deployment
+  shell: kubectl rollout -n "{{ observability_namespace }}" restart ds/promtail
