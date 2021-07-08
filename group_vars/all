@@ -8,6 +8,7 @@ copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}
 # Hardware features
 disable_wifi: true
 enable_i2c_displays: false
+rpi_nodes: true
 
 # Kubernetes version variables
 arch: arm64
@@ -19,9 +20,15 @@ longhorn_version: v1.1.1
 prometheus_operator_version: v0.8.0
 metallb_version: v0.9.6
 traefik_helm_version: 9.11.0
+promtail_version: 6.13.7
+prometheus_version: 6.13.7
+tempo_helm_version: 0.7.3
+grafana_helm_version: 6.13.7
 # Kubernetes config variables
 apiserver_url: https://knode0:6443
 extensions_dir: /tmp/k8s/extensions
+nfs_server_for_pv:
+nfs_path_for_pv:
 
 #############################################
 # For RaspberryOS uncomment the following

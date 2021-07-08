@@ -1,0 +1,17 @@
+---
+- name: Create a Service object from an inline definition
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: nfs
+      spec:
+        capacity:
+          storage: "{{ nfs_pv_size }}"
+        accessModes:
+          - ReadWriteMany
+        nfs:
+          server: "{{ nfs_pv_server }}"
+          path: "{{ nfs_pv_path }}"

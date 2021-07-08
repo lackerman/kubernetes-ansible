@@ -3,12 +3,7 @@ knode0  ansible_host=knode0
 
 [workers]
 knode1  ansible_host=knode1
-knode2  ansible_host=knode2
-
-[cluster]
-knode0
-knode1
-knode2
+#knode2  ansible_host=knode2
 
 # The loadbalancer is the remote (cloud-based) instance
 # that will route traffic to the cluster

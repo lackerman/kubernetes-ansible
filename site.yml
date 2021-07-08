@@ -16,7 +16,7 @@
     - role: displays
       when: enable_i2c_displays
 
-- hosts: rpis
+- hosts: all
   tasks:
     - name: check if the container features have been enabled
       become: yes
@@ -26,6 +26,7 @@
         regexp: '^(?!.*cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory)(.*?)(console=tty1 .+)$'
         replace: '\1cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory \2'
       register: enable_cgroups
+      when: rpi_nodes
 
     - name: "reboot and wait until ready"
       become: yes
@@ -37,7 +38,7 @@
         pre_reboot_delay: 0
         post_reboot_delay: 30
         test_command: whoami
-      when: enable_cgroups.changed
+      when: enable_cgroups.changed and rpi_nodes
 
 - hosts: controllers
   tags: k8s

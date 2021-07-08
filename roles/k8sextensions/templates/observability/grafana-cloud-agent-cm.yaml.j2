@@ -93,6 +93,10 @@ data:
       - name: default
         receivers:
           zipkin:
+          otlp:
+            protocols:
+              grpc:
+              http:
         remote_write:
           - endpoint: tempo-us-central1.grafana.net:443
             basic_auth:

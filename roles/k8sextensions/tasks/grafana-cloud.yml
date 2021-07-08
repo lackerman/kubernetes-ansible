@@ -6,8 +6,8 @@
 
 - name: (grafana cloud) set the extension directory for grafana cloud
   set_fact:
-    grafana_cloud_ext_dir: "{{ extensions_dir }}/grafana-cloud"
-    observability_namespace: observability
+    grafana_cloud_ext_dir: "{{ extensions_dir }}/observability/grafana-cloud"
+    grafana_cloud_namespace: observability
     grafana_cloud_manifests:
       - 'grafana-agent-cm.yaml'
       - 'grafana-agent-deployment.yaml'
@@ -22,9 +22,9 @@
 - name: (grafana cloud) include the secret variables
   include_vars: .secret
 
-- name: (grafana cloud) create the '{{ observability_namespace }}' namespace
+- name: (grafana cloud) create the '{{ grafana_cloud_namespace }}' namespace
   k8s:
-    name: "{{ observability_namespace }}"
+    name: "{{ grafana_cloud_namespace }}"
     api_version: v1
     kind: Namespace
     state: present
@@ -40,7 +40,7 @@
   loop: "{{ grafana_cloud_manifests }}"
 
 - name: (grafana cloud) restart the grafana agent deployment
-  shell: kubectl rollout -n "{{ observability_namespace }}" restart ds/grafana-agent
+  shell: kubectl rollout -n "{{ grafana_cloud_namespace }}" restart ds/grafana-agent
 
 - name: (grafana cloud) restart the promtail deployment
-  shell: kubectl rollout -n "{{ observability_namespace }}" restart ds/promtail
+  shell: kubectl rollout -n "{{ grafana_cloud_namespace }}" restart ds/promtail

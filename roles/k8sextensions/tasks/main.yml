@@ -8,11 +8,17 @@
 
 - include: traefik-ingress.yml
 
-- include: longhorn-storage.yml
+- include: nfs-persistent-volume.yml
+
+#- include: longhorn.yml
 
 #- include: kube-prometheus-obs.yml
 
-- include: grafana-cloud-obs.yml
+#- include: kube-prometheus-obs.yml
+
+# - include: grafana-cloud.yml
+
+- include: grafana-local.yml
 
 - include: cert-manager.yml
 
