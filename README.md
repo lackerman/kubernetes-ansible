@@ -1,6 +1,25 @@
-# RPi K8s cluster playbook
+# ansible k8s cluster playbook
 
 This playbook sets up a k8s cluster on the specified hosts.
+Supports either k0s or k3s. Originally built to be run on Raspberry Pis
+but it has also been tested to work on multipass VMs.
+
+Kubernetes extensions (operators, controllers, crds) include:
+- Storage
+    - longhorn (distributed block storage)
+    - nfs persistent volume
+- Certificate management
+    - cert-manager (LetsEncrypt)
+- Gitops
+    - fluxcd
+- Observability
+    - grafana-cloud
+    - simple grafana components (grafana, prometheus, tempo, loki/promtail)
+    - kube-prometheus operator
+- Loadbalancing
+    - metallb
+- Ingress
+    - Traefik
 
 ## prerequisites
 
@@ -115,7 +134,6 @@ ansible -i hosts <hosts: all, knode0, etc> -m setup
 ### setup certs
 
 https://certbot.eff.org/instructions
-
 
 [setup_sd_card]: https://garywoodfine.com/how-to-create-raspbian-sd-card-ubuntu/
 [raspbian_buster]: https://www.raspberrypi.org/downloads/raspbian/
