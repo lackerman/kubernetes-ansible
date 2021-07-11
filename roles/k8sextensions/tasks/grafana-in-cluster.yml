@@ -1,0 +1,67 @@
+---
+######################################################################
+# Loki Stack & Tempo helm installation
+#  https://github.com/grafana/helm-charts/tree/main/charts
+#  https://grafana.com/docs/loki/latest/installation/helm/
+#  https://github.com/grafana/helm-charts/tree/main/charts/tempo
+######################################################################
+
+- name: (grafana in cluster) set the extension directory for grafana cloud
+  set_fact:
+    grafana_in_cluster_ext_dir: "{{ extensions_dir }}/observability/grafana-in-cluster"
+    grafana_in_cluster_namespace: observability
+
+- name: (grafana in cluster) ensure the extensions directory exists
+  file:
+    path: "{{ grafana_in_cluster_ext_dir }}"
+    state: directory
+
+- name: (grafana in cluster) copy the values files across
+  copy:
+    src: "{{ item }}"
+    dest: "{{ grafana_in_cluster_ext_dir }}"
+  with_fileglob:
+    - files/helm-values-*.yaml
+
+- name: (grafana in cluster) create the '{{ grafana_in_cluster_namespace }}' namespace
+  k8s:
+    name: "{{ grafana_in_cluster_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: (grafana in cluster) install 'grafana/loki-stack' helm chart with loki, grafana & prometheus
+  community.kubernetes.helm:
+    chart_ref: loki-stack
+    chart_repo_url: "https://grafana.github.io/helm-charts"
+    chart_version: "{{ loki_helm_version }}"
+    release_name: loki-stack
+    release_namespace: "{{ grafana_in_cluster_namespace }}"
+    values_files:
+      - "{{ grafana_in_cluster_ext_dir }}/helm-values-loki-stack.yaml"
+
+- name: (grafana in cluster) install 'grafana/tempo' helm chart
+  community.kubernetes.helm:
+    chart_ref: tempo
+    chart_repo_url: "https://grafana.github.io/helm-charts"
+    chart_version: "{{ tempo_helm_version }}"
+    release_name: tempo
+    release_namespace: "{{ grafana_in_cluster_namespace }}"
+    values_files:
+      - "{{ grafana_in_cluster_ext_dir }}/helm-values-tempo.yaml"
+
+- name: (grafana in cluster) include the secret variables
+  include_vars: .secret
+
+- name: (grafana in cluster) copy across the ingress manifest
+  template:
+    src: "grafana-in-cluster/ingress.yaml.j2"
+    dest: "{{ grafana_in_cluster_ext_dir }}/ingress.yaml"
+
+- name: (grafana in cluster) deploy the kube-prometheus ingress
+  k8s:
+    state: present
+    namespace: "{{ grafana_in_cluster_namespace }}"
+    src: "{{ grafana_in_cluster_ext_dir }}/ingress.yaml"
+    validate:
+      fail_on_error: yes

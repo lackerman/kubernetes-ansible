@@ -4,7 +4,7 @@ metadata:
   name: kube-prometheus-ingress
 spec:
   rules:
-  - host: "prometheus.a6n.xyz"
+  - host: "prometheus.{{ domain }}"
     http:
       paths:
       - pathType: Prefix
@@ -14,7 +14,7 @@ spec:
             name: prometheus-k8s
             port:
               number: 9090
-  - host: "grafana.a6n.xyz"
+  - host: "grafana.{{ domain }}"
     http:
       paths:
       - pathType: Prefix

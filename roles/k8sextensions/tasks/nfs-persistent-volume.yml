@@ -1,5 +1,11 @@
+###
+# https://github.com/kubernetes/examples/tree/master/staging/volumes/nfs
+###
 ---
-- name: Create a Service object from an inline definition
+- name: (nfs pv) include the secret variables
+  include_vars: .secret
+
+- name: (nfs pv) create an NFS persistent volume
   community.kubernetes.k8s:
     state: present
     definition:

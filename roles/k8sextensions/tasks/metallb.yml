@@ -32,13 +32,6 @@
     validate:
       fail_on_error: yes
 
-- name: (metallb) deploy the metallb manifests 'metallb.yaml'
-  k8s:
-    state: present
-    src: "{{ metallb_ext_dir }}/metallb.yaml"
-    validate:
-      fail_on_error: yes
-
 - name: (metallb) check that the metallb secret exists
   shell: kubectl get secrets -n metallb-system --no-headers
   register: existing_secret
@@ -64,6 +57,9 @@
         namespace: metallb-system
       type: Opaque
 
+- name: (metallb) include the secret variables
+  include_vars: .secret
+
 - name: (metallb) install the metallb configmap for Layer2 IPs
   k8s:
     state: present
@@ -81,4 +77,11 @@
           - name: default
             protocol: layer2
             addresses:
-            - 192.168.64.250-192.168.64.253
+            - {{ loadbalancer_ip_range }}
+
+- name: (metallb) deploy the metallb manifests 'metallb.yaml'
+  k8s:
+    state: present
+    src: "{{ metallb_ext_dir }}/metallb.yaml"
+    validate:
+      fail_on_error: yes

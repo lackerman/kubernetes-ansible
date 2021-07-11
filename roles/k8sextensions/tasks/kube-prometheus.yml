@@ -33,7 +33,7 @@
               storageClassName: longhorn
               resources:
                 requests:
-                  storage: 2Gi
+                  storage: 10Gi
 
 - name: (kube-prometheus) install kube-prometheus to monitor the cluster
   shell: kubectl apply -f "{{ kube_prom_ext_dir }}/manifests/"
@@ -43,19 +43,15 @@
     path: "{{ kube_prom_ext_dir }}/manifests/ingress"
     state: directory
 
-- name: (kube-prometheus) copy the files to extensions directory
-  copy:
-    src: "{{ item }}"
+- name: (kube-prometheus) copy across the ingress manifest
+  template:
+    src: "kube-prometheus/ingress.yaml.j2"
     dest: "{{ kube_prom_ext_dir }}/manifests/ingress/"
-  with_fileglob:
-    - files/*
 
 - name: (kube-prometheus) deploy the kube-prometheus ingress
   k8s:
     state: present
     namespace: monitoring
-    src: "{{ kube_prom_ext_dir }}/manifests/ingress/kube-prometheus-ingress.yaml"
+    src: "{{ kube_prom_ext_dir }}/manifests/ingress/ingress.yaml"
     validate:
       fail_on_error: yes
-
-#TODO: Add the Grafana dashboard for the cluster
