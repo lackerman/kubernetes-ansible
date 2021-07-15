@@ -131,7 +131,24 @@ Print all facts
 ansible -i hosts <hosts: all, knode0, etc> -m setup
 ```
 
-### setup certs
+## route traffic to nodes
+
+Traffic can routed from the loadbalancer to the nodes by exposing the cluster nodes subnet to tailscale, for example:
+
+For the following on the nodes
+```
+sudo tailscale up --advertise-routes=x.x.x.x/24 --accept-routes
+```
+and then on the loadbalancer
+```
+sudo tailscale up --accept-routes
+```
+
+Note make sure you Review the subnets in the tailscale admin console
+
+## setup certs
+
+Once you have validated that you can hit the ingress from the loadbalancer, it is time to setup TLS endpoints.
 
 https://certbot.eff.org/instructions
 

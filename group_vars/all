@@ -25,8 +25,6 @@ loki_helm_version: 2.4.1
 # Kubernetes config variables
 apiserver_url: https://knode0:6443
 extensions_dir: /tmp/k8s/extensions
-nfs_server_for_pv:
-nfs_path_for_pv:
 
 #############################################
 # For RaspberryOS uncomment the following
@@ -41,6 +39,6 @@ nfs_path_for_pv:
 #############################################
 
 default_user: ubuntu
-remove_default_user: false
+remove_default_user: true
 firmware_config: /boot/firmware/usercfg.txt
 cmdline_config: /boot/firmware/cmdline.txt

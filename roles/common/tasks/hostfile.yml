@@ -24,11 +24,3 @@
   when: inventory_hostname in groups['workers'] and hostvars[item].ansible_host is defined
   with_items: "{{ groups.controllers }}"
 
-- name: add IP address of all hosts tailscale IPs to the loadbalancers
-  lineinfile:
-    dest: /etc/hosts
-    regexp: "{{ hostvars[item].vpn }}.*$"
-    line: "{{ hostvars[item].vpn }} {{item}}.vpn"
-    state: present
-  when: inventory_hostname in groups['loadbalancers'] and hostvars[item].vpn is defined
-  with_items: "{{ groups.workers }}"

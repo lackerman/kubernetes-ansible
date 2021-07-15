@@ -4,7 +4,7 @@
 #   https://longhorn.io/docs/1.1.1/deploy/install/install-with-kubectl/
 #########################################################################
 
-- name: (longhorn storage) set the extension directory for grafana cloud
+- name: (longhorn storage) set the facts
   set_fact:
     longhorn_ext_dir: "{{ extensions_dir }}/longhorn-storage"
 

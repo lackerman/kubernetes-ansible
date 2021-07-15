@@ -4,7 +4,7 @@
 #   Tempo: https://grafana.com/docs/tempo/latest/getting-started/
 ##################################################################
 
-- name: (grafana cloud) set the extension directory for grafana cloud
+- name: (grafana cloud) set the facts
   set_fact:
     grafana_cloud_ext_dir: "{{ extensions_dir }}/observability/grafana-cloud"
     grafana_cloud_namespace: observability

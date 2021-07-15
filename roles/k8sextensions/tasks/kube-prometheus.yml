@@ -4,7 +4,7 @@
 #   https://github.com/prometheus-operator/kube-prometheus#installing
 ######################################################################
 
-- name: (kube-prometheus) set the extension directory for grafana cloud
+- name: (kube-prometheus) set the facts
   set_fact:
     kube_prom_ext_dir: "{{ extensions_dir }}/kube-prometheus"
 

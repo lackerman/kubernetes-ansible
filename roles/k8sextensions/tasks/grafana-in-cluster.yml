@@ -6,7 +6,7 @@
 #  https://github.com/grafana/helm-charts/tree/main/charts/tempo
 ######################################################################
 
-- name: (grafana in cluster) set the extension directory for grafana cloud
+- name: (grafana in cluster) set the facts
   set_fact:
     grafana_in_cluster_ext_dir: "{{ extensions_dir }}/observability/grafana-in-cluster"
     grafana_in_cluster_namespace: observability
@@ -20,8 +20,9 @@
   copy:
     src: "{{ item }}"
     dest: "{{ grafana_in_cluster_ext_dir }}"
-  with_fileglob:
-    - files/helm-values-*.yaml
+  with_items:
+    - files/helm-values-tempo.yaml
+    - files/helm-values-loki-stack.yaml
 
 - name: (grafana in cluster) create the '{{ grafana_in_cluster_namespace }}' namespace
   k8s:

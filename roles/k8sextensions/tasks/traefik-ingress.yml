@@ -5,9 +5,26 @@
 #   https://traefik.io/blog/from-zero-to-hero-getting-started-with-k0s-and-traefik/
 #######################################################################################
 
-- name: (traefik ingress) create the 'ingress' namespace
+- name: (traefik ingress) set the facts
+  set_fact:
+    traefik_ext_dir: "{{ extensions_dir }}/traefik"
+    traefik_namespace: ingress
+
+- name: (traefik ingress) ensure the extensions directory exists
+  file:
+    path: "{{ traefik_ext_dir }}"
+    state: directory
+
+- name: (traefik ingress) copy the values files across
+  copy:
+    src: "{{ item }}"
+    dest: "{{ traefik_ext_dir }}"
+  with_items:
+    - files/helm-values-traefik.yaml
+
+- name: (traefik ingress) create the '{{ traefik_namespace }}' namespace for traefik
   k8s:
-    name: ingress
+    name: "{{ traefik_namespace }}"
     api_version: v1
     kind: Namespace
     state: present
@@ -18,4 +35,16 @@
     chart_repo_url: "https://helm.traefik.io/traefik"
     chart_version: "{{ traefik_helm_version }}"
     release_name: traefik
-    release_namespace: ingress
+    release_namespace: "{{ traefik_namespace }}"
+
+- name: (traefik ingress) try 5 times (with 5 seconds intervals) to get ingress loadbalancer IP
+  shell: kubectl get svc -n "{{ traefik_namespace }}" traefik -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  register: ingress_ip
+
+- name: (traefik ingress) set the ingress ip fact for loadbalancers
+  set_fact:
+    ingress_ip: "{{ ingress_ip.stdout }}"
+  run_once: true
+  delegate_facts: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['loadbalancers'] }}"

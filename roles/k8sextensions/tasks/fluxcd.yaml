@@ -4,7 +4,7 @@
 #   https://fluxcd.io/docs/get-started/
 ########################################
 
-- name: (fluxcd) set the extension directory for fluxcd
+- name: (fluxcd) set the facts
   set_fact:
     fluxcd_ext_dir: "{{ extensions_dir }}/fluxcd"
 

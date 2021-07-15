@@ -4,7 +4,7 @@
 #   https://metallb.universe.tf/installation/#installation-by-manifest
 #######################################################################
 
-- name: (metallb) set the extension directory for grafana cloud
+- name: (metallb) set the facts
   set_fact:
     metallb_ext_dir: "{{ extensions_dir }}/metallb"
 

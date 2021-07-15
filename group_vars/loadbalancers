@@ -1,0 +1,6 @@
+---
+disable_wifi: false
+enable_i2c_displays: false
+rpi_nodes: false
+default_user: root
+remove_default_user: false

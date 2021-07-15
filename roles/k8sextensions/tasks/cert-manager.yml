@@ -5,7 +5,7 @@
 #   https://opensource.com/article/20/3/ssl-letsencrypt-k3s
 ################################################################
 
-- name: (cert management) set the extension directory for cert management
+- name: (cert management) set the facts
   set_fact:
     cert_man_ext_dir: "{{ extensions_dir }}/cert-manager"
 
