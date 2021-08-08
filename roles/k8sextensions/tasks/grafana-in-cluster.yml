@@ -21,7 +21,6 @@
     src: "{{ item }}"
     dest: "{{ grafana_in_cluster_ext_dir }}"
   with_items:
-    - files/helm-values-tempo.yaml
     - files/helm-values-loki-stack.yaml
 
 - name: (grafana in cluster) create the '{{ grafana_in_cluster_namespace }}' namespace
@@ -30,6 +29,50 @@
     api_version: v1
     kind: Namespace
     state: present
+
+- name: (grafana in cluster) include the secret variables
+  include_vars: .secret
+
+- name: (nfs pv) create an NFS persistent volume
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: prometheus-nfs
+        labels:
+          app: prometheus
+      spec:
+        capacity:
+          storage: "32Gi"
+        accessModes:
+          - ReadWriteMany
+        nfs:
+          server: "{{ nfs_pv_server }}"
+          path: "{{ nfs_pv_root_path }}"
+
+- name: (grafana in cluster) create an NFS persistent volume
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: prometheus-nfs
+        namespace: "{{ grafana_in_cluster_namespace }}"
+        labels:
+          app: prometheus
+      spec:
+        storageClassName: ""
+        accessModes:
+          - ReadWriteMany
+        selector: 
+          matchLabels: 
+            app: prometheus
+        resources:
+          requests:
+            storage: "32Gi"
 
 - name: (grafana in cluster) install 'grafana/loki-stack' helm chart with loki, grafana & prometheus
   community.kubernetes.helm:
@@ -48,8 +91,7 @@
     chart_version: "{{ tempo_helm_version }}"
     release_name: tempo
     release_namespace: "{{ grafana_in_cluster_namespace }}"
-    values_files:
-      - "{{ grafana_in_cluster_ext_dir }}/helm-values-tempo.yaml"
+    values: "{{ lookup('template', 'grafana-in-cluster/helm-values-tempo.yaml.j2') | from_yaml }}"
 
 - name: (grafana in cluster) include the secret variables
   include_vars: .secret

@@ -1,0 +1,16 @@
+{% if arch == "arm64" %}
+# Helm values for Tempo for arm64
+tempo:
+  repository: lackerman/tempo
+  tag: 1.0.1
+  receivers:
+    zipkin:
+      endpoint: 0.0.0.0:9411
+tempoQuery:
+  pullPolicy: Always
+  repository: lackerman/tempo-query
+  tag: 1.0.1-arm64
+  {% set tomcat_value = tomcat_1_value %}
+{% else %}
+foo: bar
+{% endif %}
