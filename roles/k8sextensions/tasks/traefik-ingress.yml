@@ -7,20 +7,7 @@
 
 - name: (traefik ingress) set the facts
   set_fact:
-    traefik_ext_dir: "{{ extensions_dir }}/traefik"
     traefik_namespace: ingress
-
-- name: (traefik ingress) ensure the extensions directory exists
-  file:
-    path: "{{ traefik_ext_dir }}"
-    state: directory
-
-- name: (traefik ingress) copy the values files across
-  copy:
-    src: "{{ item }}"
-    dest: "{{ traefik_ext_dir }}"
-  with_items:
-    - files/helm-values-traefik.yaml
 
 - name: (traefik ingress) create the '{{ traefik_namespace }}' namespace for traefik
   k8s:
@@ -36,6 +23,7 @@
     chart_version: "{{ traefik_helm_version }}"
     release_name: traefik
     release_namespace: "{{ traefik_namespace }}"
+    values: "{{ lookup('template', 'helm-values-traefik.yaml.j2') | from_yaml }}"
 
 - name: (traefik ingress) try 5 times (with 5 seconds intervals) to get ingress loadbalancer IP
   shell: kubectl get svc -n "{{ traefik_namespace }}" traefik -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'

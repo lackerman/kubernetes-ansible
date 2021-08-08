@@ -6,21 +6,27 @@
 
 ## Loadbalancing
 - include: metallb.yml
+  when: not ingress_node_port
 
 ## Ingress
 - include: traefik-ingress.yml
 
 ## Storage
-# - include: longhorn.yml
-- include: nfs-persistent-volume.yml
+- include: longhorn.yml
+  when: longhorn
 
 ## Observability
-# - include: kube-prometheus.yml
-# - include: grafana-cloud.yml
+- include: kube-prometheus.yml
+  when: kube_prom
+- include: grafana-cloud.yml
+  when: grafana_cloud
 - include: grafana-in-cluster.yml
+  when: grafana_in_cluster
 
 ## Certificate management
 - include: cert-manager.yml
+  when: cert_manager
 
 ## Gitops
-#- include: fluxcd.yaml
+- include: fluxcd.yaml
+  when: fluxcd

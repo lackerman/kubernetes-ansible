@@ -1,0 +1,12 @@
+{% if ingress_node_port == true %}
+ports:
+  web:
+    # redirectTo: websecure
+    nodePort: 32080
+  websecure:
+    nodePort: 32443
+service:
+  type: NodePort
+{% else %}
+foo: bar
+{% endif %}
