@@ -11,7 +11,7 @@
       shell: k0s default-config > "{{ ansible_env.HOME }}/k0s.yaml"
 
     - name: install k0s controller as a service
-      shell: k0s install controller
+      shell: k0s install controller --enable-worker
 
     - name: enable the service
       systemd:
@@ -36,6 +36,12 @@
       systemd:
         state: started
         name: k0scontroller
+    
+    - name: set role
+      shell: "kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/master=master --overwrite"
+
+    - name: prevent the master node from running workloads
+      shell: "kubectl taint nodes {{ inventory_hostname }} node-role.kubernetes.io/master=true:NoSchedule --overwrite"
 
 - name: create .kube the directory
   file:

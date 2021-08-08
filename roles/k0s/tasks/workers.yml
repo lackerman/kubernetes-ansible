@@ -24,3 +24,6 @@
       systemd:
         state: started
         name: k0sworker
+
+    - name: set role
+      shell: "kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker"

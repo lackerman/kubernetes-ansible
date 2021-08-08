@@ -8,7 +8,7 @@
       modprobe br_netfilter
   register: enable_modules
 
-- name: "reboot and wait until ready"
+- name: reboot and wait until ready
   reboot:
     msg: "Reboot initiated by ansible"
     connect_timeout: 5
@@ -17,6 +17,11 @@
     post_reboot_delay: 30
     test_command: whoami
   when: enable_modules.changed
+
+- name: ensure nodes have the right packages
+  apt:
+    name: ['nfs-common']
+    state: latest
 
 - name: download k0s version '{{ k0s_version }}'
   get_url:
@@ -33,21 +38,21 @@
   with_fileglob:
     - files/*
 
-- name: "kubectl: check if it is already installed"
+- name: (kubectl) check if it is already installed
   stat:
     path: /usr/local/bin/kubectl
   register: stat_result
 
-- name: "kubectl: install"
+- name: (kubectl) install if missing
   when: not stat_result.stat.exists
   block:
-    - name: "kubectl: get the latest stable version"
+    - name: (kubectl) get the latest stable version
       uri:
         url: https://dl.k8s.io/release/stable.txt
         return_content: yes
       register: kubectl_version
 
-    - name: "kubectl: download the file"
+    - name: (kubectl) download the file
       get_url:
         url: "https://dl.k8s.io/release/{{ kubectl_version.content }}/bin/linux/{{ arch }}/kubectl"
         dest: /usr/local/bin/kubectl
@@ -59,32 +64,32 @@
       - kubernetes
       - kubernetes-validate
 
-- name: install "helm" with option --classic
+- name: snap install "helm" with option --classic
   community.general.snap:
     name: helm
     classic: yes
 
-- name: "crictl: check if it is already installed"
+- name: (crictl) check if it is already installed
   stat:
     path: /usr/local/bin/crictl
   register: crictl_stat_result
 
-- name: "crictl: install"
+- name: (crictl) install
   when: not crictl_stat_result.stat.exists
   block:
-    - name: "crictl: download crictl version '{{ crictl_version }}'"
+    - name: (crictl) download crictl version '{{ crictl_version }}'
       get_url:
         url: https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ crictl_version }}/crictl-{{ crictl_version }}-linux-{{ arch }}.tar.gz
         dest: /tmp/crictl-{{ crictl_version }}-linux-{{ arch }}.tar.gz
         mode: '0755'
 
-    - name: "crictl: Extract the tarball"
+    - name: (crictl) extract the tarball
       unarchive:
         src: /tmp/crictl-{{ crictl_version }}-linux-{{ arch }}.tar.gz
         dest: /usr/local/bin
         remote_src: yes
 
-    - name: "crictl: delete tarball"
+    - name: (crictl) delete tarball
       file:
         state: absent
         path: /tmp/crictl-{{ crictl_version }}-linux-{{ arch }}.tar.gz
