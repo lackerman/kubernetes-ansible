@@ -85,7 +85,16 @@ variable, thereafter, it uses public keys for ssh (based on the default
 > password-based auth to public-private key auth) without throwing
 > an error. As a result, the playbook has to be executed twice
 > to get it setup.
-  
+
+**Not using a standard ssh port?**
+Set a host entry in your ~/.ssh/config file, for example:
+```
+Host kube-node0
+    HostName 10.0.0.1
+    Port 2222
+```
+See this [StackOverflow post][ansible_ssh_non_standard_port] for more details
+
 ```shell script
 ansible-playbook -i hosts site.yml -c paramiko --ask-pass
 # This should fail with the following error
@@ -144,7 +153,7 @@ and then on the loadbalancer
 sudo tailscale up --accept-routes
 ```
 
-Note make sure you Review the subnets in the tailscale admin console
+> **Note:** make sure you Review the subnets in the tailscale admin console
 
 ## setup certs
 
@@ -155,3 +164,4 @@ https://certbot.eff.org/instructions
 [setup_sd_card]: https://garywoodfine.com/how-to-create-raspbian-sd-card-ubuntu/
 [raspbian_buster]: https://www.raspberrypi.org/downloads/raspbian/
 [ubuntu2004]: https://ubuntu.com/download/server/arm
+[ansible_ssh_non_standard_port]: https://stackoverflow.com/questions/34333058/ansible-change-ssh-port-in-playbook
