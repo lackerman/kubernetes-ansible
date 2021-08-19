@@ -25,5 +25,14 @@
         state: started
         name: k0sworker
 
-    - name: set role
-      shell: "kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker"
+- name: install k0s service on workers
+  shell: "kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker"
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['controllers'] }}"
+
+- name: (openebs storage) enable the iSCSI
+  systemd:
+    name: iscsid
+    enabled: yes
+    force: yes
+  when: openebs

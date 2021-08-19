@@ -33,7 +33,7 @@
 - name: (grafana in cluster) include the secret variables
   include_vars: .secret
 
-- name: (nfs pv) create an NFS persistent volume
+- name: (grafana in cluster) create a NFS PV for prometheus
   community.kubernetes.k8s:
     state: present
     definition:
@@ -52,7 +52,7 @@
           server: "{{ nfs_pv_server }}"
           path: "{{ nfs_pv_root_path }}"
 
-- name: (grafana in cluster) create an NFS persistent volume
+- name: (grafana in cluster) create a NFS PV for grafana
   community.kubernetes.k8s:
     state: present
     definition:

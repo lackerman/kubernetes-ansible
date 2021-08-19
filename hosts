@@ -1,11 +1,11 @@
 [controllers]
-knode0  ansible_host=192.168.144.5
+knode0  ansible_host=knode0
 
 [workers]
-knode1  ansible_host=192.168.144.4
-#knode2  ansible_host=knode2
+knode1  ansible_host=knode1
+knode2  ansible_host=knode2
 
 # The loadbalancer is the remote (cloud-based) instance
 # that will route traffic to the cluster
 [loadbalancers]
-loadbalancer ansible_host=loadbalancer
+#loadbalancer ansible_host=loadbalancer

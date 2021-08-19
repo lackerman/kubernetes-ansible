@@ -1,0 +1,56 @@
+---
+#########################################################################
+# Longhorn setup instructions:
+#   https://docs.openebs.io/docs/next/uglocalpv-hostpath.html
+#########################################################################
+
+- name: (openebs storage) set the facts
+  set_fact:
+    openebs_namespace: "storage"
+    openebs_ext_dir: "{{ extensions_dir }}/openebs-storage"
+
+- name: (openebs storage) ensure the extension directory exists
+  file:
+    path: "{{ openebs_ext_dir }}"
+    state: directory
+
+- name: (openebs storage) download the operator yaml
+  get_url:
+    url: "https://openebs.github.io/charts/openebs-operator-lite.yaml"
+    dest: "{{ openebs_ext_dir }}/openebs-operator-lite.yaml"
+    mode: '0664'
+
+- name: (openebs storage) install the operator
+  k8s:
+    state: present
+    src: "{{ openebs_ext_dir }}/openebs-operator-lite.yaml"
+
+- name: (openebs storage) install the storage classes yaml
+  k8s:
+    state: present
+    validate:
+      fail_on_error: yes
+    definition:
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: openebs-hostpath
+        annotations:
+          openebs.io/cas-type: local
+          cas.openebs.io/config: |
+            # hostpath type will create a PV by
+            # creating a sub-directory under the
+            # BASEPATH provided below.
+            - name: StorageType
+              value: "hostpath"
+            # Specify the location (directory) where
+            # where PV(volume) data will be saved.
+            # A sub-directory with pv-name will be
+            # created. When the volume is deleted,
+            # the PV sub-directory will be deleted.
+            # Default value is /var/openebs/local
+            - name: BasePath
+              value: "/var/openebs/local/"
+      provisioner: openebs.io/local
+      reclaimPolicy: Retain
+      volumeBindingMode: WaitForFirstConsumer
