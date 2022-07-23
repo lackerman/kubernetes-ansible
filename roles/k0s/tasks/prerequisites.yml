@@ -58,7 +58,8 @@
         dest: /usr/local/bin/kubectl
         mode: '0755'
 
-- pip:
+- name: install ansible dependencies
+  pip:
     name:
       - openshift
       - kubernetes

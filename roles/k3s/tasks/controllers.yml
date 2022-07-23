@@ -49,7 +49,8 @@
     src: /var/lib/rancher/k3s/server/node-token
   register: worker_token
 
-- set_fact:
+- name: set the worker tokens
+  set_fact:
     worker_token: "{{ worker_token.content | b64decode | replace('\n', '') }}"
 
 - name: set the node_password needed by agent nodes to join the cluster
